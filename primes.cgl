@@ -1,0 +1,22 @@
+# Computes prime numbers by trial subtraction
+display = 2;
+my candidate = 3;
+while(1) infinite loop {
+  my divisor;
+  divisor = 3;
+  while(divisor < candidate) trials {
+    my remainder;
+    remainder = candidate;
+    while(remainder > 0) repeated subtraction {
+      remainder -= divisor;
+    }
+    if(remainder == 0) divisible {
+      candidate += 2;
+      divisor = 3;
+    } else not divisible {
+      divisor += 2;
+    }
+  }
+  display = candidate;
+  candidate += 2;
+}
