@@ -20,7 +20,7 @@ public class Compiler {
    * @throws FileNotFoundException
    */
   public static void main(String[] args) throws FileNotFoundException {
-    Scanner in = new Scanner(new File("primes.cgl"));
+    Scanner in = new Scanner(new File("source.cgl"));
     System.out.println("\nSource Cogol:");
     while (in.hasNextLine()) {
       String line = in.nextLine();
@@ -158,14 +158,17 @@ public class Compiler {
   static final Map<String, String> type = new HashMap<String, String>();
   static final ArrayList<String> RAMmap = new ArrayList<String>();
   static final String ProgramCounter = "pc";
+  static final String CallStackPointer = "call";
   static final String stdout = "display";
   static final String wordType = "word";
   static final String arrayType = "array";
   static final Set<String> reserved = new HashSet<String>();
   static String[] scratch = new String[1];
   static final ArrayList<OpenLoop> loops = new ArrayList<OpenLoop>();
+  static final ArrayList<Subroutine> subs = new ArrayList<Subroutine>();
+  static final Map<String, Subroutine> subroutine = new HashMap<String, Subroutine>();
   static int nextLoopID = 0;
-  static final int delaySlots = 1;
+  static int delaySlots = 1;
   static final boolean optimizeDelay = true;
 
   /**
@@ -282,6 +285,7 @@ public class Compiler {
       createWord("scratch" + i);
       reserved.add("scratch" + i);
     }
+    reserved.add(CallStackPointer);
   }
 
   /**
@@ -289,17 +293,37 @@ public class Compiler {
    * type, and then calls a more specialized compiler method
    */
   public static void compile() {
+    ArrayList<CallStatement> calls = new ArrayList<CallStatement>();
     while (tokens.size() > 0) {
       clearS();
       if (tokens.get(0).equals("my")) {
-        compileDef(mainROM);
+        compileDef();
       } else if (tokens.get(0).equals("if") || tokens.get(0).equals("while")) {
         compileLoopStart(mainROM);
+      } else if (tokens.get(0).equals("sub")) {
+        compileSub(mainROM);
       } else if (tokens.get(0).equals("}")) {
         compileLoopStop(mainROM);
+      } else if (tokens.get(0).equals("call")) {
+
+        calls.add(0, new CallStatement(mainROM.size(), rmStatementTokens()));
       } else {
         compileMove(mainROM);
       }
+    }
+    for (int i = 0; i < calls.size(); i++) {
+      compileCall(mainROM, calls.get(i));
+    }
+  }
+
+  static class CallStatement {
+    int loc;
+    ArrayList<String> statement;
+
+    public CallStatement(int loc, ArrayList<String> statement) {
+      super();
+      this.loc = loc;
+      this.statement = statement;
     }
   }
 
@@ -308,6 +332,7 @@ public class Compiler {
    * replaced by more complex joining code
    */
   public static void joinParts() {
+    createArray(CallStackPointer, 0);
     mainROM.addAll(0, ROMpredefs);
   }
 
@@ -315,6 +340,7 @@ public class Compiler {
    * Fills in argument values based on tags
    */
   public static void fillTags() {
+
     Map<String, Integer> tagLocs = new HashMap<String, Integer>();
     for (int i = 0; i < mainROM.size(); i++) {
       Command c = mainROM.get(i);
@@ -324,11 +350,20 @@ public class Compiler {
     }
     for (int i = 0; i < mainROM.size(); i++) {
       Command c = mainROM.get(i);
+      if (address.containsKey(c.arg1.tag)) {
+        c.arg1.val = address.get(c.arg1.tag) + c.arg1.tagoffset;
+      }
       if (tagLocs.containsKey(c.arg1.tag)) {
         c.arg1.val = tagLocs.get(c.arg1.tag) + c.arg1.tagoffset;
       }
+      if (address.containsKey(c.arg2.tag)) {
+        c.arg2.val = address.get(c.arg2.tag) + c.arg2.tagoffset;
+      }
       if (tagLocs.containsKey(c.arg2.tag)) {
         c.arg2.val = tagLocs.get(c.arg2.tag) + c.arg2.tagoffset;
+      }
+      if (address.containsKey(c.arg3.tag)) {
+        c.arg3.val = address.get(c.arg3.tag) + c.arg3.tagoffset;
       }
       if (tagLocs.containsKey(c.arg3.tag)) {
         c.arg3.val = tagLocs.get(c.arg3.tag) + c.arg3.tagoffset;
@@ -363,14 +398,33 @@ public class Compiler {
   }
 
   /**
-   * Responsible for creating WHILE and IF statements
-   * It calculates the commands for the beginning and end of the loop
-   * The ending is stored in an OpenLoop to be added when then loop is closed
-   * @param ROM Command list to modify
+   * Removes everything up to and including the next semicolon Used to generate
+   * error messages
+   * 
+   * @return removed tokens
+   */
+  public static ArrayList<String> rmStatementTokens() {
+    ArrayList<String> res = new ArrayList<String>();
+    while (tokens.size() > 0 && !tokens.get(0).equals(";")) {
+      res.add(tokens.remove(0));
+    }
+    if (tokens.size() > 0 && tokens.get(0).equals(";")) {
+      res.add(tokens.remove(0));
+    }
+    return res;
+  }
+
+  /**
+   * Responsible for creating WHILE and IF statements It calculates the commands
+   * for the beginning and end of the loop The ending is stored in an OpenLoop
+   * to be added when then loop is closed
+   * 
+   * @param ROM
+   *          Command list to modify
    */
   public static void compileLoopStart(ArrayList<Command> ROM) {
     String type = tokens.remove(0);
-    OpenLoop loop = new OpenLoop(type, nextLoopID);
+    OpenLoop loop = new OpenLoop(type);
     nextLoopID++;
     loops.add(0, loop);
     tokens.remove(0); // (
@@ -551,8 +605,9 @@ public class Compiler {
   }
 
   /**
-   * Appends the loop ending that was computed during loop creation
-   * It also handles ELSE statements by creating another loop
+   * Appends the loop ending that was computed during loop creation It also
+   * handles ELSE statements by creating another loop
+   * 
    * @param ROM
    */
   public static void compileLoopStop(ArrayList<Command> ROM) {
@@ -561,8 +616,8 @@ public class Compiler {
     ROM.addAll(loop.commands);
     if (loop.type.equals("if")) {
       if (tokens.get(0).equals("else")) {
-        String type = tokens.remove(0); // else
-        OpenLoop loop2 = new OpenLoop(type, nextLoopID);
+        tokens.remove(0); // else
+        OpenLoop loop2 = new OpenLoop("else");
         nextLoopID++;
         loops.add(0, loop2);
         String oBrace = tokens.remove(0);
@@ -574,10 +629,13 @@ public class Compiler {
             new Arg(address.get(ProgramCounter)), "begin" + loop2));
         compileDelaySlots(ROM);
       }
+    }
+    if (loop.type.equals("if") || loop.type.equals("else")
+        || loop.type.equals("sub")) {
       ROM.get(ROM.size() - 1).tag = "end" + loop;
     }
-    if (loop.type.equals("else")) {
-      ROM.get(ROM.size() - 1).tag = "end" + loop;
+    if (loop.type.equals("sub")) {
+      subs.remove(0);
     }
   }
 
@@ -587,20 +645,22 @@ public class Compiler {
    * @param ROM
    *          command list to modify
    */
-  public static void compileDef(ArrayList<Command> ROM) {
+  public static void compileDef() {
+    // used to test for constant initializers
+    ArrayList<Command> ROM = new ArrayList<Command>();
     tokens.remove(0); // my
     String name = tokens.remove(0);
     if (address.containsKey(name)) {
       System.err.println("error: my " + name + rmStatement());
+    } else if (reserved.contains(name)) {
+      System.err.println("error: reserved name at my " + name + rmStatement());
     } else {
       String type = tokens.remove(0);
       if (type.equals("[")) {
         Integer size = Integer.parseInt(tokens.remove(0));
         tokens.remove(0); // ]
         String eq = tokens.remove(0); // ; or =
-        System.out.println("A");
         if (eq.equals("=")) {
-          System.out.println("B");
           tokens.remove(0); // {
           ArrayList<Integer> inits = new ArrayList<Integer>();
           Arg init = compileRef(ROM, false);
@@ -674,16 +734,23 @@ public class Compiler {
       name = tokens.remove(0);
     }
     Arg arg1 = null;
+    if (reserved.contains(name)) {
+      System.err.println("error: reserved address at: " + name + rmStatement());
+      return null;
+    }
     if (!address.containsKey(name)
-        && (isDest || getAddress(ROM, name).val == null)) {
+        && (isDest || getAddress(ROM, name).val == null)
+        && (subs.size() == 0 || subs.get(0).args.contains(name))) {
       System.err.println("error: undeclared variable at: " + name
           + rmStatement());
-    } else if (reserved.contains(name)) {
-      System.err.println("error: reserved address at: " + name + rmStatement());
     } else {
       String type = tokens.remove(0);
       if (type.equals("[")) {
         arg1 = getAddress(ROM, name, type, tokens.remove(0), tokens.remove(0));
+      } else if (type.equals(".")) {
+        if (subroutine.get(name) == null) {
+
+        }
       } else {
         arg1 = getAddress(ROM, name);
         tokens.add(0, type); // putting terminator back on
@@ -710,7 +777,7 @@ public class Compiler {
     Arg arg1 = null;
     String op = "";
     if (eq.equals("=")) {
-      if(tokens.get(0).equals("-")){
+      if (tokens.get(0).equals("-")) {
         arg1 = new Arg(0);
       } else {
         arg1 = compileRef(ROM, false);
@@ -837,6 +904,80 @@ public class Compiler {
   }
 
   /**
+   * Declare a subroutine
+   * 
+   * @param ROM
+   *          command sequence to modify
+   */
+  public static void compileSub(ArrayList<Command> ROM) {
+    tokens.remove(0); // sub
+    String name = tokens.remove(0);
+    if (subroutine.get(name) != null) {
+      System.err.println("error: duplicate subroutine " + name);
+    }
+    createWord(name);
+    OpenLoop loop = new OpenLoop("sub");
+    Subroutine sub = new Subroutine(name, loop);
+    loop.name = "_" + name;
+    loops.add(0, loop);
+    subs.add(0, sub);
+    subroutine.put(name, sub);
+    tokens.remove(0); // (
+    if (tokens.get(0).equals(")")) {
+      tokens.remove(0); // )
+    }
+    while (!tokens.get(0).equals("{")) {
+      sub.compileDef(tokens);
+    }
+    ROM.add(new Command("MLZ", new Arg(-1), new Arg("end" + loop, 1), new Arg(
+        ProgramCounter, 0)));
+    compileDelaySlots(ROM);
+    ROM.add(new Command("ADD", new Arg(sub.firstFreeRAM), new Arg(1, name, 0),
+        new Arg(CallStackPointer, 0), "begin" + loop));
+    // sub.print();
+    if (optimizeDelay && delaySlots == 1) {
+      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, name, 0),
+          new Arg(address.get(ProgramCounter))));
+      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(1, name, 0),
+          new Arg(CallStackPointer, 0)));
+    } else {
+      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(1, name, 0),
+          new Arg(CallStackPointer, 0)));
+      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, name, 0),
+          new Arg(address.get(ProgramCounter))));
+      compileDelaySlots(ROM);
+    }
+    tokens.remove(0); // {
+  }
+
+  public static void compileCall(ArrayList<Command> ROM, CallStatement call) {
+    ArrayList<Command> tempROM = new ArrayList<Command>();
+    tokens.addAll(0, call.statement);
+    tokens.remove(0); // call
+    String subName = tokens.remove(0);
+    Subroutine sub = subroutine.get(subName);
+    if (sub == null) {
+      System.err.print("error: undeclared subroutine at call " + subName
+          + rmStatement());
+    } else {
+      tokens.remove(0); // (
+      if (tokens.get(0).equals(")")) {
+        tokens.remove(0); // )
+      }
+      while (!tokens.get(0).equals(";")) {
+        sub.compileDef(tokens);
+        String varName = tokens.remove(0);
+        if (tokens.get(0).equals("[")) {
+
+        } else if (wordType.equals(varName)) {
+        }
+      }
+      tokens.remove(0); // ;
+    }
+    ROM.addAll(call.loc, tempROM);
+  }
+
+  /**
    * @param ROM
    *          command sequence to modify
    * @param strings
@@ -849,6 +990,13 @@ public class Compiler {
     for (String s : strings) {
       var += s;
     }
+    Subroutine inSub = null;
+    for (int i = 0; i < subs.size(); i++) {
+      if (subs.get(i).args.contains(strings[0])) {
+        inSub = subs.get(i);
+      }
+    }
+    // TODO
     if (strings.length != 1 && strings.length != 4) {
       System.err.println("error: bad tokens at " + var);
       return null;
@@ -861,7 +1009,7 @@ public class Compiler {
       }
     }
 
-    if (address.get(strings[0]) == null) {
+    if (address.get(strings[0]) == null && inSub == null) {
       System.err.println("error: undeclared name at " + var);
     } else if (address.get(var) != null) {
       if (strings.length == 1 && !wordType.equals(type.get(strings[0]))) {
@@ -873,11 +1021,18 @@ public class Compiler {
     } else if (strings.length == 4 && strings[1].equals("[")
         && strings[3].equals("]")) {
       Arg index = getAddress(ROM, strings[2]);
-      if (index.mode == 0) {
-        return new Arg(1, address.get(strings[0] + "[0]") + index.val);
-      } else if (index.mode == 1) {
+      if (arrayType.equals(type.get(strings[0]))) {
+        if (index.mode == 0) {
+          return new Arg(1, address.get(strings[0]) + 1 + index.val);
+        } else if (index.mode == 1) {
+          Arg temp = mallocS();
+          ROM.add(new Command("ADD", new Arg(address.get(strings[0]) + 1),
+              index, temp));
+          return new Arg(2, temp.val);
+        }
+      } else if (wordType.equals(type.get(strings[0]))) {
         Arg temp = mallocS();
-        ROM.add(new Command("ADD", new Arg(address.get(strings[0]) + 1), index,
+        ROM.add(new Command("ADD", new Arg(1, address.get(strings[0])), index,
             temp));
         return new Arg(2, temp.val);
       }
@@ -905,7 +1060,7 @@ public class Compiler {
         return false;
       }
     } else if (a.val > 65535 || a.val < 0) {
-      System.err.println("warning: overflow at " + a);
+      System.err.println("warningchat: overflow at " + a);
       return false;
     }
     return true;
