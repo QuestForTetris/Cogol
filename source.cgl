@@ -1,0 +1,6 @@
+my tree;
+sub bob (valA = 47, valB = 152, sum){
+  sum = valA + valB;
+}
+call tree = bob();
+display = tree.sum;
