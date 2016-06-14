@@ -338,6 +338,7 @@ public class Compiler {
       }
     }
     for (int i = 0; i < calls.size(); i++) {
+      clearS();
       compileCall(mainROM, calls.get(i));
     }
   }
@@ -345,11 +346,14 @@ public class Compiler {
   static class CallStatement {
     int loc;
     ArrayList<String> statement;
+    ArrayList<Subroutine> cursubs;
 
     public CallStatement(int loc, ArrayList<String> statement) {
       super();
       this.loc = loc;
       this.statement = statement;
+      this.cursubs = new ArrayList<Subroutine>();
+      cursubs.addAll(subs);
     }
 
     String pointerName() {
@@ -1144,6 +1148,10 @@ public class Compiler {
    * @param call
    */
   public static void compileCall(ArrayList<Command> ROM, CallStatement call) {
+    ArrayList<Subroutine> oldsubs = new ArrayList<Subroutine>();
+    oldsubs.addAll(subs);
+    subs.clear();
+    subs.addAll(call.cursubs);
     ArrayList<Command> tempROM = new ArrayList<Command>();
     tokens.addAll(0, call.statement);
     tokens.remove(0); // call
@@ -1164,21 +1172,19 @@ public class Compiler {
         new Arg(1, temp.val)));
     freeS(temp);
     tempROM.add(new Command("MLZ", new Arg(-1),
-        new Arg(1, CallStackPointer, 0), new Arg(subName, 0)));
-    tempROM
-        .add(new Command("MLZ", new Arg(-1), new Arg(1, subName, 0), pointer));
-    tempROM.add(new Command("MLZ", new Arg(-1), new Arg("call" + ID + "_"
-        + subName, 1), new Arg(1, subName, 0)));
+        new Arg(1, CallStackPointer, 0), pointer));
 
     tokens.remove(0); // (
     if (tokens.get(0).equals(")")) {
       tokens.remove(0); // )
     }
     int argnum = 2; // the first two are call return and previous instance
+    // holds commands until after change-of-scope
+    ArrayList<Command> defArgROM = new ArrayList<Command>();
     for (; !tokens.get(0).equals(";"); argnum++) {
       if (tokens.get(0).equals(",")) {
         tokens.remove(0);
-        tempROM.addAll(sub.inits.get(argnum));
+        defArgROM.addAll(sub.inits.get(argnum));
       } else {
         String argName = sub.args.get(argnum);
 
@@ -1191,14 +1197,9 @@ public class Compiler {
           Arg source = compileRef(tempROM, false);
           tokens.remove(0); // , or )
 
-          temp = null;
-          if (source.scratches == null || source.scratches.size() == 0) {
-            temp = mallocS();
-          } else {
-            temp = source.scratches.get(0);
-          }
+          temp = mallocS();
 
-          tempROM.add(new Command("ADD", new Arg(1, subName, 0), new Arg(
+          tempROM.add(new Command("ADD", new Arg(pointer.mode + 1, pointer.val), new Arg(
               argName, 0, subName), temp));
           tempROM.add(new Command("MLZ", new Arg(-1), source, new Arg(1,
               temp.val)));
@@ -1207,6 +1208,13 @@ public class Compiler {
         }
       }
     }
+    // change of scope
+    tempROM.add(new Command("MLZ", new Arg(-1),
+        new Arg(pointer.mode + 1, pointer.val), new Arg(subName, 0)));
+    tempROM.add(new Command("MLZ", new Arg(-1), new Arg("call" + ID + "_"
+        + subName, 1), new Arg(1, subName, 0)));
+    
+    tempROM.addAll(defArgROM);
     for (; argnum < sub.args.size(); argnum++) {
       tempROM.addAll(sub.inits.get(argnum));
     }
@@ -1216,6 +1224,9 @@ public class Compiler {
     compileDelaySlots(tempROM);
     tempROM.get(tempROM.size() - 1).tag = "call" + ID + "_" + subName;
     ROM.addAll(call.loc, tempROM);
+
+    subs.clear();
+    subs.addAll(oldsubs);
   }
 
   /**
