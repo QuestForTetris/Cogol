@@ -1169,6 +1169,7 @@ public class Compiler {
     int argnum = 2; // the first two are call return and previous instance
     for (; !tokens.get(0).equals(";"); argnum++) {
       if (tokens.get(0).equals(",")) {
+        tokens.remove(0);
         tempROM.addAll(sub.inits.get(argnum));
       } else {
         String argName = sub.args.get(argnum);
