@@ -55,12 +55,12 @@ public class Compiler {
 
   static ArrayList<String> tokens = new ArrayList<String>();
   // characters that are their own token
-  static final String singletons = ",.;{}()[]$\\";
+  static final String singletons = ",.:;{}()[]$\\";
   // characters that are their own tokens, but repetitions and combinations are
   // grouped
   static final String reps = "<>&|!=+-^";
   // separators, repetition is ignored
-  static final String seps = " :";
+  static final String seps = " \t";
   static final String digits = "0123456789";
 
   /**
@@ -1169,12 +1169,21 @@ public class Compiler {
         tempROM.addAll(init);
       }
     } else {
-      while (!tokens.get(0).equals(";")) {
-        sub.compileDef(tokens);
-        String varName = tokens.remove(0);
-        if (tokens.get(0).equals("[")) {
+      int argnum = 0;
+      for (argnum = 0; !tokens.get(0).equals(";"); argnum++) {
+        if (tokens.get(0).equals(",")) {
+          tempROM.addAll(sub.inits.get(argnum));
+        } else {
+          String argName = sub.args.get(argnum);
 
-        } else if (wordType.equals(varName)) {
+          String varName = tokens.get(0);
+          if (tokens.get(1).equals("[")) {
+
+          } else if (arrayType.equals(varName)) {
+
+          } else {
+            Arg source = compileRef(tempROM, false);
+          }
         }
       }
     }
@@ -1205,11 +1214,12 @@ public class Compiler {
     }
     if (a.mode == 0 && !isDest) {
       if (a.val > Short.MAX_VALUE || a.val < Short.MIN_VALUE) {
-        System.err.println("warning: overflow at " + a);
+        System.err
+            .println("warning: potential 2's complement overflow at " + a);
         return false;
       }
     } else if (a.val > 65535 || a.val < 0) {
-      System.err.println("warningchat: overflow at " + a);
+      System.err.println("warning: potential unsigned overflow at " + a);
       return false;
     }
     return true;
