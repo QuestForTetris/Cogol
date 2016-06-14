@@ -66,6 +66,7 @@ public class Compiler {
   // separators, repetition is ignored
   static final String seps = " \t";
   static final String digits = "0123456789";
+  static final String forbid = "~`#@%*|/'";
 
   /**
    * splits text into tokens, appended to list is magic
@@ -80,6 +81,9 @@ public class Compiler {
     boolean quote = false;
     for (int i = 0; i < inchars.length; i++) {
       String curchar = Character.toString(inchars[i]);
+      if (forbid.contains(curchar)) {
+        System.err.println("error: forbidden character " + curchar);
+      }
       if (quote) {
         if (curchar.equals("\"")) {
           // exiting quotes
@@ -1199,8 +1203,9 @@ public class Compiler {
 
           temp = mallocS();
 
-          tempROM.add(new Command("ADD", new Arg(pointer.mode + 1, pointer.val), new Arg(
-              argName, 0, subName), temp));
+          tempROM.add(new Command("ADD",
+              new Arg(pointer.mode + 1, pointer.val), new Arg(argName, 0,
+                  subName), temp));
           tempROM.add(new Command("MLZ", new Arg(-1), source, new Arg(1,
               temp.val)));
 
@@ -1209,11 +1214,11 @@ public class Compiler {
       }
     }
     // change of scope
-    tempROM.add(new Command("MLZ", new Arg(-1),
-        new Arg(pointer.mode + 1, pointer.val), new Arg(subName, 0)));
+    tempROM.add(new Command("MLZ", new Arg(-1), new Arg(pointer.mode + 1,
+        pointer.val), new Arg(subName, 0)));
     tempROM.add(new Command("MLZ", new Arg(-1), new Arg("call" + ID + "_"
         + subName, 1), new Arg(1, subName, 0)));
-    
+
     tempROM.addAll(defArgROM);
     for (; argnum < sub.args.size(); argnum++) {
       tempROM.addAll(sub.inits.get(argnum));
