@@ -1160,32 +1160,46 @@ public class Compiler {
     tempROM
         .add(new Command("MLZ", new Arg(-1), new Arg(1, subName, 0), pointer));
     tempROM.add(new Command("MLZ", new Arg(-1), new Arg("call" + ID + "_"
-        + subName, 0), new Arg(1, subName, 0)));
+        + subName, 1), new Arg(1, subName, 0)));
 
     tokens.remove(0); // (
     if (tokens.get(0).equals(")")) {
       tokens.remove(0); // )
-      for (ArrayList<Command> init : sub.inits) {
-        tempROM.addAll(init);
-      }
-    } else {
-      int argnum = 0;
-      for (argnum = 0; !tokens.get(0).equals(";"); argnum++) {
-        if (tokens.get(0).equals(",")) {
-          tempROM.addAll(sub.inits.get(argnum));
+    }
+    int argnum = 2; // the first two are call return and previous instance
+    for (; !tokens.get(0).equals(";"); argnum++) {
+      if (tokens.get(0).equals(",")) {
+        tempROM.addAll(sub.inits.get(argnum));
+      } else {
+        String argName = sub.args.get(argnum);
+
+        String varName = tokens.get(0);
+        if (tokens.get(1).equals("[")) {
+
+        } else if (arrayType.equals(varName)) {
+
         } else {
-          String argName = sub.args.get(argnum);
+          Arg source = compileRef(tempROM, false);
+          tokens.remove(0); // , or )
 
-          String varName = tokens.get(0);
-          if (tokens.get(1).equals("[")) {
-
-          } else if (arrayType.equals(varName)) {
-
+          temp = null;
+          if (source.scratches == null || source.scratches.size() == 0) {
+            temp = mallocS();
           } else {
-            Arg source = compileRef(tempROM, false);
+            temp = source.scratches.get(0);
           }
+
+          tempROM.add(new Command("ADD", new Arg(1, subName, 0), new Arg(
+              argName, 0, subName), temp));
+          tempROM.add(new Command("MLZ", new Arg(-1), source, new Arg(1,
+              temp.val)));
+
+          freeS(temp);
         }
       }
+    }
+    for (; argnum < sub.args.size(); argnum++) {
+      tempROM.addAll(sub.inits.get(argnum));
     }
     tokens.remove(0); // ;
     tempROM.add(new Command("MLZ", new Arg(-1), new Arg("begin" + sub.loop, 0),
