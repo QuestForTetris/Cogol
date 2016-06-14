@@ -376,9 +376,9 @@ public class Compiler {
     }
     for (int i = 0; i < mainROM.size(); i++) {
       Command c = mainROM.get(i);
-      fillTags(c.arg1,tagLocs);
-      fillTags(c.arg2,tagLocs);
-      fillTags(c.arg3,tagLocs);
+      fillTags(c.arg1, tagLocs);
+      fillTags(c.arg2, tagLocs);
+      fillTags(c.arg3, tagLocs);
     }
   }
 
@@ -1165,18 +1165,18 @@ public class Compiler {
     tokens.remove(0); // (
     if (tokens.get(0).equals(")")) {
       tokens.remove(0); // )
-      for(ArrayList<Command> init : sub.inits){
+      for (ArrayList<Command> init : sub.inits) {
         tempROM.addAll(init);
       }
     } else {
-    while (!tokens.get(0).equals(";")) {
-      sub.compileDef(tokens);
-      String varName = tokens.remove(0);
-      if (tokens.get(0).equals("[")) {
+      while (!tokens.get(0).equals(";")) {
+        sub.compileDef(tokens);
+        String varName = tokens.remove(0);
+        if (tokens.get(0).equals("[")) {
 
-      } else if (wordType.equals(varName)) {
+        } else if (wordType.equals(varName)) {
+        }
       }
-    }
     }
     tokens.remove(0); // ;
     tempROM.add(new Command("MLZ", new Arg(-1), new Arg("begin" + sub.loop, 0),
