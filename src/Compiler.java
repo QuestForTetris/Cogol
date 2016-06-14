@@ -20,7 +20,11 @@ public class Compiler {
    * @throws FileNotFoundException
    */
   public static void main(String[] args) throws FileNotFoundException {
-    Scanner in = new Scanner(new File("source.cgl"));
+    String sourcefile = "source.cgl";
+    if (args.length > 0) {
+      sourcefile = args[0];
+    }
+    Scanner in = new Scanner(new File(sourcefile));
     System.out.println("\nSource Cogol:");
     while (in.hasNextLine()) {
       String line = in.nextLine();
@@ -115,6 +119,10 @@ public class Compiler {
         tokens.add(curchar);
       } else if (reps.contains(curchar)) {
         // character is its own token, repeated
+        if (curtoken.length() > 0) {
+          tokens.add(curtoken);
+          curtoken = "";
+        }
         String prevToken = null;
         if (tokens.size() > 0) {
           prevToken = tokens.get(tokens.size() - 1);
@@ -987,9 +995,9 @@ public class Compiler {
         ROM.add(new Command("ADD", arg1, arg2, arg3));
       } else if (op.equals("-") || op.equals("+-")) {
         ROM.add(new Command("SUB", arg1, arg2, arg3));
-      } else if (op.equals("&&")) {
+      } else if (op.equals("&")) {
         ROM.add(new Command("AND", arg1, arg2, arg3));
-      } else if (op.equals("||")) {
+      } else if (op.equals("|")) {
         ROM.add(new Command("OR", arg1, arg2, arg3));
       } else if (op.equals("^")) {
         ROM.add(new Command("XOR", arg1, arg2, arg3));
