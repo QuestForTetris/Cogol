@@ -44,11 +44,18 @@ public class Compiler {
     for (int i = 0; i < RAMmap.size(); i++) {
       System.out.println(i + ": " + RAMmap.get(i));
     }
+
+    for (String sub : subroutine.keySet()) {
+      System.out.println("\n" + sub + " map:");
+      for (int i = 0; i < subroutine.get(sub).RAMmap.size(); i++) {
+        System.out.println(i + ": " + subroutine.get(sub).RAMmap.get(i));
+      }
+    }
   }
 
   static ArrayList<String> tokens = new ArrayList<String>();
   // characters that are their own token
-  static final String singletons = ",;{}()[]$\\";
+  static final String singletons = ",.;{}()[]$\\";
   // characters that are their own tokens, but repetitions and combinations are
   // grouped
   static final String reps = "<>&|!=+-^";
@@ -167,7 +174,6 @@ public class Compiler {
   static final ArrayList<OpenLoop> loops = new ArrayList<OpenLoop>();
   static final ArrayList<Subroutine> subs = new ArrayList<Subroutine>();
   static final Map<String, Subroutine> subroutine = new HashMap<String, Subroutine>();
-  static int nextLoopID = 0;
   static int delaySlots = 1;
   static final boolean optimizeDelay = true;
 
@@ -305,8 +311,20 @@ public class Compiler {
       } else if (tokens.get(0).equals("}")) {
         compileLoopStop(mainROM);
       } else if (tokens.get(0).equals("call")) {
-
-        calls.add(0, new CallStatement(mainROM.size(), rmStatementTokens()));
+        CallStatement call = new CallStatement(mainROM.size(),
+            rmStatementTokens());
+        Subroutine isLocal = null;
+        for (int i = subs.size() - 1; i >= 0; i--) {
+          if (subs.get(i).args.contains(call.pointerName())) {
+            isLocal = subs.get(i);
+          }
+        }
+        if (isLocal == null) {
+          type.put(call.pointerName(), call.subName());
+        } else {
+          isLocal.type.put(call.pointerName(), call.subName());
+        }
+        calls.add(0, call);
       } else {
         compileMove(mainROM);
       }
@@ -324,6 +342,14 @@ public class Compiler {
       super();
       this.loc = loc;
       this.statement = statement;
+    }
+
+    String pointerName() {
+      return statement.get(1);
+    }
+
+    String subName() {
+      return statement.get(3);
     }
   }
 
@@ -350,24 +376,27 @@ public class Compiler {
     }
     for (int i = 0; i < mainROM.size(); i++) {
       Command c = mainROM.get(i);
-      if (address.containsKey(c.arg1.tag)) {
-        c.arg1.val = address.get(c.arg1.tag) + c.arg1.tagoffset;
+      fillTags(c.arg1,tagLocs);
+      fillTags(c.arg2,tagLocs);
+      fillTags(c.arg3,tagLocs);
+    }
+  }
+
+  static void fillTags(Arg arg, Map<String, Integer> tagLocs) {
+    if (arg.sub == null || arg.sub.equals("")) {
+      if (address.containsKey(arg.tag)) {
+        arg.val = address.get(arg.tag) + arg.tagoffset;
       }
-      if (tagLocs.containsKey(c.arg1.tag)) {
-        c.arg1.val = tagLocs.get(c.arg1.tag) + c.arg1.tagoffset;
+    } else {
+      Subroutine s = subroutine.get(arg.sub);
+      if (s == null || !s.address.containsKey(arg.tag)) {
+        System.err.println("error: invalid subroutine name at " + arg);
+      } else {
+        arg.val = s.address.get(arg.tag) + arg.tagoffset;
       }
-      if (address.containsKey(c.arg2.tag)) {
-        c.arg2.val = address.get(c.arg2.tag) + c.arg2.tagoffset;
-      }
-      if (tagLocs.containsKey(c.arg2.tag)) {
-        c.arg2.val = tagLocs.get(c.arg2.tag) + c.arg2.tagoffset;
-      }
-      if (address.containsKey(c.arg3.tag)) {
-        c.arg3.val = address.get(c.arg3.tag) + c.arg3.tagoffset;
-      }
-      if (tagLocs.containsKey(c.arg3.tag)) {
-        c.arg3.val = tagLocs.get(c.arg3.tag) + c.arg3.tagoffset;
-      }
+    }
+    if (tagLocs.containsKey(arg.tag)) {
+      arg.val = tagLocs.get(arg.tag) + arg.tagoffset;
     }
   }
 
@@ -425,7 +454,6 @@ public class Compiler {
   public static void compileLoopStart(ArrayList<Command> ROM) {
     String type = tokens.remove(0);
     OpenLoop loop = new OpenLoop(type);
-    nextLoopID++;
     loops.add(0, loop);
     tokens.remove(0); // (
 
@@ -618,7 +646,6 @@ public class Compiler {
       if (tokens.get(0).equals("else")) {
         tokens.remove(0); // else
         OpenLoop loop2 = new OpenLoop("else");
-        nextLoopID++;
         loops.add(0, loop2);
         String oBrace = tokens.remove(0);
         while (!oBrace.equals("{")) {
@@ -738,29 +765,169 @@ public class Compiler {
       System.err.println("error: reserved address at: " + name + rmStatement());
       return null;
     }
-    if (!address.containsKey(name)
-        && (isDest || getAddress(ROM, name).val == null)
-        && (subs.size() == 0 || subs.get(0).args.contains(name))) {
-      System.err.println("error: undeclared variable at: " + name
-          + rmStatement());
-    } else {
-      String type = tokens.remove(0);
-      if (type.equals("[")) {
-        arg1 = getAddress(ROM, name, type, tokens.remove(0), tokens.remove(0));
-      } else if (type.equals(".")) {
-        if (subroutine.get(name) == null) {
-
-        }
-      } else {
-        arg1 = getAddress(ROM, name);
-        tokens.add(0, type); // putting terminator back on
-      }
-      arg1.mode += slash;
+    try {
+      Integer value = Integer.parseInt(name);
       if (isDest) {
-        arg1.mode--;
+        System.err.println("error: bare number at: " + name + rmStatement());
+        return null;
+      } else {
+        return new Arg(0, value);
+      }
+    } catch (Exception e) {
+    }
+    Subroutine isLocal = null;
+    for (int i = subs.size() - 1; i >= 0; i--) {
+      if (subs.get(i).args.contains(name)) {
+        isLocal = subs.get(i);
       }
     }
+    if (!address.containsKey(name) && isLocal == null
+        && !tokens.get(0).equals(".")) {
+      System.err.println("error: undeclared variable at: " + name
+          + rmStatement());
+      return null;
+    }
+    String reftype = tokens.get(0);
+    if (reftype.equals("[")) {
+      tokens.remove(0); // [
+      Arg index = compileRef(ROM, false);
+      if (isLocal == null) {
+        if (arrayType.equals(type.get(name))) {
+          if (index.mode == 0) {
+            arg1 = new Arg(1, address.get(name) + 1 + index.val);
+          } else {
+            Arg temp = null;
+            if (index.scratches.size() > 0) {
+              temp = index.scratches.get(0);
+            } else {
+              temp = mallocS();
+            }
+            ROM.add(new Command("ADD", new Arg(address.get(name) + 1), index,
+                temp));
+            arg1 = new Arg(2, temp.val);
+            arg1.scratches.add(temp);
+          }
+        } else if (wordType.equals(type.get(name))) {
+          Arg temp = null;
+          if (index.scratches.size() > 0) {
+            temp = index.scratches.get(0);
+          } else {
+            temp = mallocS();
+          }
+          ROM.add(new Command("ADD", new Arg(1, address.get(name)), index, temp));
+          arg1 = new Arg(2, temp.val);
+          arg1.scratches.add(temp);
+        }
+      } else {
+        if (arrayType.equals(isLocal.type.get(name))) {
+          if (index.mode == 0) {
+            Arg temp = null;
+            if (index.scratches.size() > 0) {
+              temp = index.scratches.get(0);
+            } else {
+              temp = mallocS();
+            }
+            ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0), new Arg(
+                isLocal.address.get(name) + 1 + index.val), temp));
+            arg1 = new Arg(2, temp.val);
+            arg1.scratches.add(temp);
+          } else {
+            Arg temp = null;
+            if (index.scratches.size() > 0) {
+              temp = index.scratches.get(0);
+            } else {
+              temp = mallocS();
+            }
+            ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0), new Arg(
+                isLocal.address.get(name) + 1), temp));
+            ROM.add(new Command("ADD", new Arg(1, temp.val), index, temp));
+            arg1 = new Arg(2, temp.val);
+            arg1.scratches.add(temp);
+          }
+        } else if (wordType.equals(type.get(name))) {
+          Arg temp = null;
+          if (index.scratches.size() > 0) {
+            temp = index.scratches.get(0);
+          } else {
+            temp = mallocS();
+          }
+          ROM.add(new Command("ADD", new Arg(1, address.get(name)), index, temp));
+          arg1 = new Arg(2, temp.val);
+          arg1.scratches.add(temp);
+        }
+      }
+      tokens.remove(0); // ]
+    } else if (reftype.equals(".")) {
+      tokens.remove(0); // .
+      if (isLocal == null) {
+        Arg temp = mallocS();
+        ArrayList<String> line = getRefTokens();
+        String varname = "";
+        String vartype = type.get(name);
+        if (wordType.equals(vartype)) {
+          vartype = name;
+        }
+        for (String s : line) {
+          varname += s;
+        }
+        ROM.add(new Command("ADD", new Arg(1, address.get(name)), new Arg(
+            varname, 0, vartype), temp));
+        arg1 = new Arg(2, temp.val);
+        arg1.scratches.add(temp);
+      } else {
+        Arg temp = mallocS();
+        ArrayList<String> line = getRefTokens();
+        String varname = "";
+        String vartype = isLocal.type.get(name);
+        if (wordType.equals(vartype)) {
+          vartype = name;
+        }
+        for (String s : line) {
+          varname += s;
+        }
+        ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0), new Arg(
+            isLocal.address.get(name)), temp));
+        ROM.add(new Command("ADD", new Arg(2, temp.val), new Arg(varname, 0,
+            vartype), temp));
+        arg1 = new Arg(2, temp.val);
+        arg1.scratches.add(temp);
+      }
+    } else {
+      if (isLocal == null) {
+        if (arrayType.equals(type.get(name))) {
+          System.err.println("warning: " + name + " of incorrect type");
+        }
+        arg1 = new Arg(1, address.get(name));
+      } else {
+        if (arrayType.equals(isLocal.type.get(name))) {
+          System.err.println("warning: " + name + " of incorrect type");
+        }
+        Arg temp = mallocS();
+        ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0), new Arg(
+            isLocal.address.get(name)), temp));
+        arg1 = new Arg(2, temp.val);
+        arg1.scratches.add(temp);
+      }
+    }
+    arg1.mode += slash;
+    if (isDest) {
+      arg1.mode--;
+    }
     return arg1;
+  }
+
+  static ArrayList<String> getRefTokens() {
+    ArrayList<String> res = new ArrayList<String>();
+    res.add(tokens.remove(0));
+    if (tokens.get(0).equals(".")) {
+      res.add(tokens.remove(0)); // .
+      res.addAll(getRefTokens());
+    } else if (tokens.get(0).equals("[")) {
+      res.add(tokens.remove(0)); // [
+      res.addAll(getRefTokens());
+      res.add(tokens.remove(0)); // ]
+    }
+    return res;
   }
 
   /**
@@ -773,7 +940,6 @@ public class Compiler {
     Arg arg3 = compileRef(ROM, true);
     checkBounds(arg3, false);
     String eq = tokens.remove(0); // =
-
     Arg arg1 = null;
     String op = "";
     if (eq.equals("=")) {
@@ -936,109 +1102,88 @@ public class Compiler {
         new Arg(CallStackPointer, 0), "begin" + loop));
     // sub.print();
     if (optimizeDelay && delaySlots == 1) {
-      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, name, 0),
-          new Arg(address.get(ProgramCounter))));
+      Arg temp = mallocS();
       loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(1, name, 0),
           new Arg(CallStackPointer, 0)));
+      loop.commands.add(new Command("ADD", new Arg(1), new Arg(1, name, 0),
+          temp));
+      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, name, 0),
+          new Arg(address.get(ProgramCounter))));
+      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, temp.val),
+          new Arg(0, name, 0)));
+      freeS(temp);
     } else {
+      Arg temp = mallocS();
       loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(1, name, 0),
           new Arg(CallStackPointer, 0)));
-      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, name, 0),
-          new Arg(address.get(ProgramCounter))));
+
+      loop.commands.add(new Command("ADD", new Arg(1), new Arg(1, name, 0),
+          temp));
+      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, temp.val),
+          new Arg(0, name, 0)));
+
+      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2,
+          CallStackPointer, 0), new Arg(address.get(ProgramCounter))));
       compileDelaySlots(ROM);
+
+      freeS(temp);
     }
     tokens.remove(0); // {
   }
 
+  /**
+   * @param ROM
+   * @param call
+   */
   public static void compileCall(ArrayList<Command> ROM, CallStatement call) {
     ArrayList<Command> tempROM = new ArrayList<Command>();
     tokens.addAll(0, call.statement);
     tokens.remove(0); // call
+    Arg pointer = compileRef(tempROM, true);
+    tokens.remove(0); // =
     String subName = tokens.remove(0);
     Subroutine sub = subroutine.get(subName);
     if (sub == null) {
       System.err.print("error: undeclared subroutine at call " + subName
           + rmStatement());
+      return;
+    }
+    Arg temp = mallocS();
+    int ID = OpenLoop.nextLoopID++;
+    tempROM.add(new Command("ADD", new Arg(1, CallStackPointer, 0), new Arg(1),
+        temp));
+    tempROM.add(new Command("MLZ", new Arg(-1), new Arg(1, subName, 0),
+        new Arg(1, temp.val)));
+    freeS(temp);
+    tempROM.add(new Command("MLZ", new Arg(-1),
+        new Arg(1, CallStackPointer, 0), new Arg(subName, 0)));
+    tempROM
+        .add(new Command("MLZ", new Arg(-1), new Arg(1, subName, 0), pointer));
+    tempROM.add(new Command("MLZ", new Arg(-1), new Arg("call" + ID + "_"
+        + subName, 0), new Arg(1, subName, 0)));
+
+    tokens.remove(0); // (
+    if (tokens.get(0).equals(")")) {
+      tokens.remove(0); // )
+      for(ArrayList<Command> init : sub.inits){
+        tempROM.addAll(init);
+      }
     } else {
-      tokens.remove(0); // (
-      if (tokens.get(0).equals(")")) {
-        tokens.remove(0); // )
-      }
-      while (!tokens.get(0).equals(";")) {
-        sub.compileDef(tokens);
-        String varName = tokens.remove(0);
-        if (tokens.get(0).equals("[")) {
+    while (!tokens.get(0).equals(";")) {
+      sub.compileDef(tokens);
+      String varName = tokens.remove(0);
+      if (tokens.get(0).equals("[")) {
 
-        } else if (wordType.equals(varName)) {
-        }
+      } else if (wordType.equals(varName)) {
       }
-      tokens.remove(0); // ;
     }
+    }
+    tokens.remove(0); // ;
+    tempROM.add(new Command("MLZ", new Arg(-1), new Arg("begin" + sub.loop, 0),
+        new Arg(ProgramCounter, 0)));
+    compileDelaySlots(tempROM);
+    tempROM.get(tempROM.size() - 1).tag = "call" + ID + "_" + subName;
     ROM.addAll(call.loc, tempROM);
-  }
-
-  /**
-   * @param ROM
-   *          command sequence to modify
-   * @param strings
-   *          A set of strings corresponding to a constant, a variable, or an
-   *          indexed variable
-   * @return An argument, either type 0, 1, or 2, that points the desired value
-   */
-  public static Arg getAddress(ArrayList<Command> ROM, String... strings) {
-    String var = "";
-    for (String s : strings) {
-      var += s;
-    }
-    Subroutine inSub = null;
-    for (int i = 0; i < subs.size(); i++) {
-      if (subs.get(i).args.contains(strings[0])) {
-        inSub = subs.get(i);
-      }
-    }
-    // TODO
-    if (strings.length != 1 && strings.length != 4) {
-      System.err.println("error: bad tokens at " + var);
-      return null;
-    }
-    if (strings.length == 1) {
-      try {
-        Integer value = Integer.parseInt(var);
-        return new Arg(0, value);
-      } catch (Exception e) {
-      }
-    }
-
-    if (address.get(strings[0]) == null && inSub == null) {
-      System.err.println("error: undeclared name at " + var);
-    } else if (address.get(var) != null) {
-      if (strings.length == 1 && !wordType.equals(type.get(strings[0]))) {
-        System.err.println("warning: " + strings[0] + "of incorrect type");
-      } else if (strings.length == 4 && !arrayType.equals(type.get(strings[0]))) {
-        System.err.println("warning: " + strings[0] + "of incorrect type");
-      }
-      return new Arg(1, address.get(var));
-    } else if (strings.length == 4 && strings[1].equals("[")
-        && strings[3].equals("]")) {
-      Arg index = getAddress(ROM, strings[2]);
-      if (arrayType.equals(type.get(strings[0]))) {
-        if (index.mode == 0) {
-          return new Arg(1, address.get(strings[0]) + 1 + index.val);
-        } else if (index.mode == 1) {
-          Arg temp = mallocS();
-          ROM.add(new Command("ADD", new Arg(address.get(strings[0]) + 1),
-              index, temp));
-          return new Arg(2, temp.val);
-        }
-      } else if (wordType.equals(type.get(strings[0]))) {
-        Arg temp = mallocS();
-        ROM.add(new Command("ADD", new Arg(1, address.get(strings[0])), index,
-            temp));
-        return new Arg(2, temp.val);
-      }
-
-    }
-    return null;
   }
 
   /**
@@ -1050,6 +1195,10 @@ public class Compiler {
    *         and addresses unsigned
    */
   public static boolean checkBounds(Arg a, boolean isDest) {
+    if (a == null) {
+      System.err.println("error: null argument");
+      return false;
+    }
     if (a.mode < 0 || a.mode > 3) {
       System.err.println("error: impossible mode of " + a);
       return false;
