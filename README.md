@@ -110,7 +110,7 @@ Subroutines are called using the following syntax.
     call myPointer = example(args);
 This runs the subroutine `example` with the specified arguments.  The variable `myPointer` is loaded with a pointer to the results.  The variable `myPointer` must have been previously declared, either as a global or local variable.  Curently, only words can serve as pointers, not array indices.
 
-*At this time, subroutine arguments are not supported, so only calls like `example()` are allowed.  This is the highest thing on my priority list.*
+*At this time, arguments in calls are not supported, so only calls like `example()` are allowed.  This is the highest thing on my priority list.*
 
 This call also changes `myPointer` to a special type of `example`.  The local variables of sunroutine can then be read using dot notation.  For example, `myPointer.omega` references the `omega` local variable of that subroutine call.
 
