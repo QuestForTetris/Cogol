@@ -1,8 +1,10 @@
+import java.util.ArrayList;
 
 public class Arg {
 
   /**
-   * @param mode Addressing mode
+   * @param mode
+   *          Addressing mode
    * @return
    */
   public static String getModePrefix(int mode) {
@@ -24,6 +26,8 @@ public class Arg {
   Integer val;
   String tag;
   int tagoffset;
+  String sub;
+  ArrayList<Arg> scratches = new ArrayList<Arg>();
 
   Arg(Integer val) {
     this.val = val;
@@ -33,6 +37,12 @@ public class Arg {
   Arg(String tag, int tagoffset) {
     this.tag = tag;
     this.tagoffset = tagoffset;
+  }
+
+  Arg(String tag, int tagoffset, String sub) {
+    this.tag = tag;
+    this.tagoffset = tagoffset;
+    this.sub = sub;
   }
 
   Arg(int mode, Integer val) {
@@ -47,11 +57,19 @@ public class Arg {
     this.tagoffset = tagoffset;
   }
 
-  Arg(int mode, Integer val, String tag, int tagoffset) {
+  Arg(int mode, String tag, int tagoffset, String sub) {
+    this.mode = mode;
+    this.tag = tag;
+    this.tagoffset = tagoffset;
+    this.sub = sub;
+  }
+
+  Arg(int mode, Integer val, String tag, int tagoffset, String sub) {
     this.mode = mode;
     this.val = val;
     this.tag = tag;
     this.tagoffset = tagoffset;
+    this.sub = sub;
   }
 
   public String toString() {
@@ -59,7 +77,11 @@ public class Arg {
     if (val != null) {
       res += val;
     } else {
-      res += "(" + tag;
+      res += "(";
+      if (sub != null) {
+        res += sub + ".";
+      }
+      res += tag;
       if (tagoffset < 0) {
         res += tagoffset;
       } else if (tagoffset > 0) {
@@ -71,6 +93,6 @@ public class Arg {
   }
 
   Arg dup() {
-    return new Arg(mode, val, tag, tagoffset);
+    return new Arg(mode, val, tag, tagoffset, sub);
   }
 }
