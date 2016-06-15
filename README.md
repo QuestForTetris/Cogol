@@ -59,13 +59,13 @@ Statements can take several forms, listed below.  Any of the destinations or var
     dest = var1 - var2;   
     dest -= var;
     dest--;
-    dest = var1 && var2;  # AND
-    dest &&= var;
-    dest = var1 || var2;  # OR
-    dest ||= var2;
-    dest = var1 ^ var2;   # XOR
+    dest = var1 & var2;  # bitwise AND
+    dest &= var;
+    dest = var1 | var2;  # bitwise OR
+    dest |= var2;
+    dest = var1 ^ var2;   # bitwise XOR
     dest ^= var;
-    dest = var1 &! var2;  # AND-NOT
+    dest = var1 &! var2;  # bitwise AND-NOT
     dest &!= var;
     dest = var1 << var2;  # shift left
     dest <<= var;
