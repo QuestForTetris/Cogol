@@ -74,7 +74,7 @@ Statements can take several forms, listed below.  Any of the destinations or var
     dest = var1 >>> var2;  # shift right logical
     dest >>>= var;
 
-Conditions are of the form `var3 (op) var4`, where the operation is any of `< <= == != => >`.  Support for conditionals is not complete for some of the more complex cases.  Loop conditionals are nearly complete, while in-line conditionals are severely lacking and should be avoided at this time.
+Conditions are of the form `var3 (op) var4` or simply `var3`, where the operation is any of `< <= == != => >`.  When the operation and second argument are omitted, the comparison is `!= 0`. Support for conditionals is not complete for some of the more complex cases.  Loop conditionals are nearly complete, while in-line conditionals are severely lacking and should be avoided at this time.
 
 ### IF statements
 
@@ -110,7 +110,7 @@ Subroutines are called using the following syntax.
     call myPointer = example(args);
 This runs the subroutine `example` with the specified arguments.  The variable `myPointer` is loaded with a pointer to the results.  The variable `myPointer` must have been previously declared, either as a global or local variable.  Curently, only words can serve as pointers, not array indices.
 
-*At this time, arguments in calls are not supported, so only calls like `example()` are allowed.  This is the highest thing on my priority list.*
+*At this time, only words as arguments in calls are supported, so things like `example(arg,arg2)` or `example()` work.*
 
 This call also changes `myPointer` to a special type of `example`.  The local variables of sunroutine can then be read using dot notation.  For example, `myPointer.omega` references the `omega` local variable of that subroutine call.
 
