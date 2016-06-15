@@ -77,4 +77,34 @@ public class Command {
     }
     return res;
   }
+
+  public Command dupWithoutTags() {
+    return new Command(opcode, arg1, arg2, arg3);
+  }
+
+  public boolean isEquivalent(String oc, Integer a1m, Integer a1v, Integer a2m,
+      Integer a2v, Integer a3m, Integer a3v) {
+    if (oc != null && !opcode.equals(oc)) {
+      return false;
+    }
+    if (a1m != null && !a1m.equals(arg1.mode)) {
+      return false;
+    }
+    if (a1v != null && !a1v.equals(arg1.val)) {
+      return false;
+    }
+    if (a2m != null && !a2m.equals(arg2.mode)) {
+      return false;
+    }
+    if (a2v != null && !a2v.equals(arg2.val)) {
+      return false;
+    }
+    if (a3m != null && !a3m.equals(arg3.mode)) {
+      return false;
+    }
+    if (a3v != null && !a3v.equals(arg3.val)) {
+      return false;
+    }
+    return true;
+  }
 }
