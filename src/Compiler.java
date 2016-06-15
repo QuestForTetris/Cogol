@@ -306,6 +306,8 @@ public class Compiler {
     reserved.add(CallStackPointer);
   }
 
+  static CallStatement prevCall;
+
   /**
    * Main compiler loop Iterates over each statement, identifies the statement
    * type, and then calls a more specialized compiler method
@@ -314,15 +316,7 @@ public class Compiler {
     ArrayList<CallStatement> calls = new ArrayList<CallStatement>();
     while (tokens.size() > 0) {
       clearS();
-      if (tokens.get(0).equals("my")) {
-        compileDef();
-      } else if (tokens.get(0).equals("if") || tokens.get(0).equals("while")) {
-        compileLoopStart(mainROM);
-      } else if (tokens.get(0).equals("sub")) {
-        compileSub(mainROM);
-      } else if (tokens.get(0).equals("}")) {
-        compileLoopStop(mainROM);
-      } else if (tokens.get(0).equals("call")) {
+      if (tokens.get(0).equals("call")) {
         CallStatement call = new CallStatement(mainROM.size(),
             rmStatementTokens());
         Subroutine isLocal = null;
@@ -337,8 +331,20 @@ public class Compiler {
           isLocal.type.put(call.pointerName(), call.subName());
         }
         calls.add(0, call);
+        prevCall = call;
       } else {
-        compileMove(mainROM);
+        if (tokens.get(0).equals("my")) {
+          compileDef();
+        } else if (tokens.get(0).equals("if") || tokens.get(0).equals("while")) {
+          compileLoopStart(mainROM);
+        } else if (tokens.get(0).equals("sub")) {
+          compileSub(mainROM);
+        } else if (tokens.get(0).equals("}")) {
+          compileLoopStop(mainROM);
+        } else {
+          compileMove(mainROM);
+        }
+        prevCall = null;
       }
     }
     for (int i = 0; i < calls.size(); i++) {
@@ -350,13 +356,13 @@ public class Compiler {
   static class CallStatement {
     int loc;
     ArrayList<String> statement;
-    ArrayList<Subroutine> cursubs;
+    ArrayList<Subroutine> cursubs = new ArrayList<Subroutine>();
+    ArrayList<String> tags = new ArrayList<String>();
 
     public CallStatement(int loc, ArrayList<String> statement) {
       super();
       this.loc = loc;
       this.statement = statement;
-      this.cursubs = new ArrayList<Subroutine>();
       cursubs.addAll(subs);
     }
 
@@ -386,8 +392,8 @@ public class Compiler {
     Map<String, Integer> tagLocs = new HashMap<String, Integer>();
     for (int i = 0; i < mainROM.size(); i++) {
       Command c = mainROM.get(i);
-      if (c.tag != null) {
-        tagLocs.put(c.tag, i);
+      for (String tag : c.tags) {
+        tagLocs.put(tag, i);
       }
     }
     for (int i = 0; i < mainROM.size(); i++) {
@@ -429,7 +435,9 @@ public class Compiler {
         Command d = mainROM.get(i + 1);
         if (d.isEquivalent("MLZ", 0, 0, 0, 0, 0, 0)) {
           if (c.arg2.val < mainROM.size()) {
-            mainROM.set(i + 1, mainROM.get(c.arg2.val).dupWithoutTags());
+            Command replacement = mainROM.get(c.arg2.val).dupWithoutTags();
+            replacement.tags.addAll(d.tags);
+            mainROM.set(i + 1, replacement);
             c.arg2.val++;
           }
         }
@@ -568,7 +576,7 @@ public class Compiler {
         if (endloc > delaySlots) {
           endloc = delaySlots;
         }
-        cond.get(endloc).tag = "end" + loop;
+        cond.get(endloc).tags.add("end" + loop);
         for (int i = 0; i < endloc; i++) {
           ROM.set(ROM.size() - delaySlots + i, cond.get(i));
         }
@@ -576,7 +584,7 @@ public class Compiler {
         loop.commands = cond;
       } else {
         compileDelaySlots(ROM);
-        cond.get(0).tag = "end" + loop;
+        cond.get(0).tags.add("end" + loop);
         compileDelaySlots(cond);
         loop.commands = cond;
       }
@@ -617,7 +625,7 @@ public class Compiler {
         ROM.add(new Command("MNZ", test, new Arg("end" + loop, 1), new Arg(
             address.get(ProgramCounter))));
         compileDelaySlots(ROM);
-        ROM.get(ROM.size() - delaySlots - 1).tag = "begin" + loop;
+        ROM.get(ROM.size() - delaySlots - 1).tags.add("begin" + loop);
       } else if (op.equals(">=") || op.equals("<=")) {
         if (op.equals("<=")) {
           Arg temp = arg1;
@@ -637,7 +645,7 @@ public class Compiler {
         ROM.add(new Command("MLZ", test, new Arg("end" + loop, 1), new Arg(
             address.get(ProgramCounter))));
         compileDelaySlots(ROM);
-        ROM.get(ROM.size() - delaySlots - 1).tag = "begin" + loop;
+        ROM.get(ROM.size() - delaySlots - 1).tags.add("begin" + loop);
       } else if (op.equals(">") || op.equals("<")) {
         if (op.equals("<")) {
           Arg temp = arg1;
@@ -655,7 +663,7 @@ public class Compiler {
         ROM.add(new Command("MLZ", test, new Arg("end" + loop, 1), new Arg(
             address.get(ProgramCounter))));
         compileDelaySlots(ROM);
-        ROM.get(ROM.size() - delaySlots - 1).tag = "begin" + loop;
+        ROM.get(ROM.size() - delaySlots - 1).tags.add("begin" + loop);
       }
     }
   }
@@ -687,7 +695,11 @@ public class Compiler {
     }
     if (loop.type.equals("if") || loop.type.equals("else")
         || loop.type.equals("sub")) {
-      ROM.get(ROM.size() - 1).tag = "end" + loop;
+      if (prevCall == null) {
+        ROM.get(ROM.size() - 1).tags.add("end" + loop);
+      } else {
+        prevCall.tags.add("end" + loop);
+      }
     }
     if (loop.type.equals("sub")) {
       subs.remove(0);
@@ -1239,7 +1251,8 @@ public class Compiler {
     tempROM.add(new Command("MLZ", new Arg(-1), new Arg("begin" + sub.loop, 0),
         new Arg(ProgramCounter, 0)));
     compileDelaySlots(tempROM);
-    tempROM.get(tempROM.size() - 1).tag = "call" + ID + "_" + subName;
+    tempROM.get(tempROM.size() - 1).tags.add("call" + ID + "_" + subName);
+    tempROM.get(tempROM.size() - 1).tags.addAll(call.tags);
     ROM.addAll(call.loc, tempROM);
 
     subs.clear();
