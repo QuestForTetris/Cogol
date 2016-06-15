@@ -1214,13 +1214,19 @@ public class Compiler {
     tokens.addAll(0, call.statement);
     tokens.remove(0); // call
     Arg pointer = null;
+    Arg theOGpointer = null;
     String eq = null;
     if (call.pointerName() == null) {
       pointer = mallocS();
     } else {
       pointer = compileRef(pointerROM, true);
+      theOGpointer = pointer;
       eq = tokens.remove(0); // =
-      tempROM.addAll(pointerROM);
+      if (call.returnsPointer) {
+        tempROM.addAll(pointerROM);
+      } else {
+        pointer = mallocS();
+      }
     }
     String subName = tokens.remove(0);
     Subroutine sub = subroutine.get(subName);
@@ -1281,7 +1287,7 @@ public class Compiler {
         pointer.val), new Arg(subName, 0)));
     tempROM.add(new Command("MLZ", new Arg(-1), new Arg("call" + ID + "_"
         + subName, 1), new Arg(1, subName, 0)));
-
+    freeS(pointer);
     tempROM.addAll(defArgROM);
     for (; argnum < sub.args.size(); argnum++) {
       tempROM.addAll(sub.inits.get(argnum));
@@ -1301,10 +1307,12 @@ public class Compiler {
       tokens.remove(0); // ;
       tempROM.addAll(pointerROM);
       if (eq.equals("=")) {
-        tempROM.add(new Command("ADD", new Arg(pointer.mode + 1, pointer.val),
-            new Arg(varname, 0, sub.name), pointer));
-        tempROM.add(new Command("MLZ", new Arg(-1), new Arg(pointer.mode + 2,
-            pointer.val), pointer));
+        temp = mallocS();
+        tempROM.add(new Command("ADD", new Arg(1, CallStackPointer, 0),
+            new Arg(varname, 0, sub.name), temp));
+        tempROM.add(new Command("MLZ", new Arg(-1), new Arg(2, temp.val),
+            theOGpointer));
+        freeS(temp);
       } else {
         System.err.println("error: call operator not supported: " + eq);
       }
