@@ -423,6 +423,18 @@ public class Compiler {
     for (Command c : mainROM) {
       c.simplify();
     }
+    for (int i = 0; i < mainROM.size() - 1; i++) {
+      Command c = mainROM.get(i);
+      if (c.isEquivalent("MLZ", 0, -1, 0, null, 0, 0)) {
+        Command d = mainROM.get(i + 1);
+        if (d.isEquivalent("MLZ", 0, 0, 0, 0, 0, 0)) {
+          if (c.arg2.val < mainROM.size()) {
+            mainROM.set(i + 1, mainROM.get(c.arg2.val).dupWithoutTags());
+            c.arg2.val++;
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -823,7 +835,7 @@ public class Compiler {
             arg1 = new Arg(2, temp.val);
             arg1.scratches.add(temp);
           }
-        } else if (wordType.equals(type.get(name))) {
+        } else {
           Arg temp = null;
           if (index.scratches.size() > 0) {
             temp = index.scratches.get(0);
@@ -860,7 +872,7 @@ public class Compiler {
             arg1 = new Arg(2, temp.val);
             arg1.scratches.add(temp);
           }
-        } else if (wordType.equals(type.get(name))) {
+        } else {
           Arg temp = null;
           if (index.scratches.size() > 0) {
             temp = index.scratches.get(0);
