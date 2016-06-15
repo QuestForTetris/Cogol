@@ -1,55 +1,100 @@
 
 Source Cogol:
-my tree;
-sub bob (valA = 47, valB = 152, sum){
-  sum = valA + valB;
+my res;
+call res = fib(10);
+display = res.sum;
+sub fib(cur,prev,sum){
+  if(cur <= 2){
+    sum = 1;
+  } else {
+    cur--;
+    call prev = fib(cur);
+    sum = prev.sum;
+    cur--;
+    call prev = fib(cur);
+    sum += prev.sum;
+  }
 }
-call tree = bob();
-display = tree.sum;
 
 Tokens:
-[my, tree, ;, sub, bob, (, vala, =, 47, ,, valb, =, 152, ,, sum, ), {, sum, =, vala, +, valb, ;, }, call, tree, =, bob, (, ), ;, display, =, tree, ., sum, ;]
+[my, res, ;, call, res, =, fib, (, 10, ), ;, display, =, res, ., sum, ;, sub, fib, (, cur, ,, prev, ,, sum, ), {, if, (, cur, <=, 2, ), {, sum, =, 1, ;, }, else, {, cur, --, ;, call, prev, =, fib, (, cur, ), ;, sum, =, prev, ., sum, ;, cur, --, ;, call, prev, =, fib, (, cur, ), ;, sum, +=, prev, ., sum, ;, }, }]
 
 Compiled QFTASM:
 0. MLZ -1 8 7;
-1. MLZ -1 12 0;
-2. MLZ 0 0 0;
-3. ADD A4 5 7; beginSub0_bob
-4. ADD A4 4 2;
-5. ADD A4 2 5;
-6. ADD A4 3 6;
-7. ADD B6 B5 A2;
-8. MLZ -1 A4 7;
-9. ADD A4 1 2;
-10. MLZ -1 B4 0;
-11. MLZ -1 B2 4; endSub0_bob
-12. ADD A7 1 5;
-13. MLZ -1 A4 A5;
-14. MLZ -1 A7 4;
-15. MLZ -1 A4 3;
-16. MLZ -1 22 A4;
-17. ADD A4 2 7;
-18. MLZ -1 47 A7;
-19. ADD A4 3 7;
-20. MLZ -1 152 A7;
-21. MLZ -1 3 0;
-22. MLZ 0 0 0; call1_bob
-23. ADD A3 4 2;
-24. MLZ -1 B2 1;
+1. ADD A7 1 2;
+2. MLZ -1 A4 A2;
+3. MLZ -1 A7 3;
+4. ADD A3 2 2;
+5. MLZ -1 10 A2;
+6. MLZ -1 A3 4;
+7. MLZ -1 10 A4;
+8. MLZ -1 15 0;
+9. ADD A4 5 7;
+10. ADD A3 4 2;
+11. MLZ -1 B2 1;
+12. MLZ -1 61 0;
+13. MLZ 0 0 0;
+14. ADD A4 5 7; beginSub0_fib
+15. ADD A4 2 2;
+16. SUB 2 B2 2;
+17. MLZ A2 23 0; beginIf1
+18. MLZ 0 0 0;
+19. ADD A4 4 2;
+20. MLZ -1 1 A2;
+21. MLZ -1 58 0; beginElse2
+22. MLZ -1 A4 7;
+23. ADD A4 2 2;
+24. ADD B2 -1 A2;
+25. ADD A4 3 2;
+26. ADD A7 1 5;
+27. MLZ -1 A4 A5;
+28. MLZ -1 A7 A2;
+29. ADD A4 2 5;
+30. ADD B2 2 6;
+31. MLZ -1 B5 A6;
+32. MLZ -1 B2 4;
+33. MLZ -1 36 A4;
+34. MLZ -1 15 0;
+35. ADD A4 5 7;
+36. ADD A4 4 2;
+37. ADD A4 3 5;
+38. ADD B5 4 5;
+39. MLZ -1 B5 A2;
+40. ADD A4 2 2;
+41. ADD B2 -1 A2;
+42. ADD A4 3 2;
+43. ADD A7 1 5;
+44. MLZ -1 A4 A5;
+45. MLZ -1 A7 A2;
+46. ADD A4 2 5;
+47. ADD B2 2 6;
+48. MLZ -1 B5 A6;
+49. MLZ -1 B2 4;
+50. MLZ -1 53 A4;
+51. MLZ -1 15 0;
+52. ADD A4 5 7;
+53. ADD A4 4 2;
+54. ADD A4 3 5;
+55. ADD B5 4 5;
+56. ADD B5 B2 A2; endElse2
+57. MLZ -1 A4 7;
+58. ADD A4 1 2;
+59. MLZ -1 B4 0;
+60. MLZ -1 B2 4; endSub0_fib
 
 RAM map:
 0: pc
 1: display
 2: scratch0
-3: tree
-4: bob
+3: res
+4: fib
 5: scratch1
 6: scratch2
 7: call
 
-bob map:
+fib map:
 0: return
 1: previous_call
-2: vala
-3: valb
+2: cur
+3: prev
 4: sum
