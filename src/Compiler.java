@@ -62,11 +62,11 @@ public class Compiler {
   static final String singletons = ",.:;{}()[]$\\";
   // characters that are their own tokens, but repetitions and combinations are
   // grouped
-  static final String reps = "<>&|!=+-^";
+  static final String reps = "<>&|!=+-^*";
   // separators, repetition is ignored
   static final String seps = " \t";
   static final String digits = "0123456789";
-  static final String forbid = "~`#@%*|/'";
+  static final String forbid = "~`@%|/'";
 
   /**
    * splits text into tokens, appended to list is magic
@@ -186,8 +186,6 @@ public class Compiler {
   static final ArrayList<OpenLoop> loops = new ArrayList<OpenLoop>();
   static final ArrayList<Subroutine> subs = new ArrayList<Subroutine>();
   static final Map<String, Subroutine> subroutine = new HashMap<String, Subroutine>();
-  static int delaySlots = 1;
-  static final boolean optimizeDelay = true;
 
   /**
    * @param name
@@ -319,16 +317,20 @@ public class Compiler {
       if (tokens.get(0).equals("call")) {
         CallStatement call = new CallStatement(mainROM.size(),
             rmStatementTokens());
-        Subroutine isLocal = null;
-        for (int i = subs.size() - 1; i >= 0; i--) {
-          if (subs.get(i).args.contains(call.pointerName())) {
-            isLocal = subs.get(i);
+        if (call.pointerName() != null) {
+          Subroutine isLocal = null;
+          for (int i = subs.size() - 1; i >= 0; i--) {
+            if (subs.get(i).args.contains(call.pointerName())) {
+              isLocal = subs.get(i);
+            }
           }
-        }
-        if (isLocal == null) {
-          type.put(call.pointerName(), call.subName());
-        } else {
-          isLocal.type.put(call.pointerName(), call.subName());
+          if (call.returnsPointer) {
+            if (isLocal == null) {
+              type.put(call.pointerName(), call.subName());
+            } else {
+              isLocal.type.put(call.pointerName(), call.subName());
+            }
+          }
         }
         calls.add(0, call);
         prevCall = call;
@@ -341,6 +343,9 @@ public class Compiler {
           compileSub(mainROM);
         } else if (tokens.get(0).equals("}")) {
           compileLoopStop(mainROM);
+        } else if (tokens.get(0).equals("return")) {
+          compileReturn(mainROM);
+          mainROM.get(mainROM.size() - 1).tags.add("return");
         } else {
           compileMove(mainROM);
         }
@@ -358,20 +363,32 @@ public class Compiler {
     ArrayList<String> statement;
     ArrayList<Subroutine> cursubs = new ArrayList<Subroutine>();
     ArrayList<String> tags = new ArrayList<String>();
+    boolean returnsPointer;
 
     public CallStatement(int loc, ArrayList<String> statement) {
       super();
       this.loc = loc;
       this.statement = statement;
       cursubs.addAll(subs);
+      returnsPointer = statement.lastIndexOf(")") >= statement.lastIndexOf(".");
     }
 
     String pointerName() {
-      return statement.get(1);
+      int eqloc = statement.indexOf("=");
+      if (eqloc > -1) {
+        return statement.get(1);
+      } else {
+        return null;
+      }
     }
 
     String subName() {
-      return statement.get(3);
+      int eqloc = statement.indexOf("=");
+      if (eqloc > -1) {
+        return statement.get(eqloc + 1);
+      } else {
+        return statement.get(1);
+      }
     }
   }
 
@@ -552,8 +569,8 @@ public class Compiler {
           }
           cond.add(new Command("SUB", arg1, arg2, testdest));
         }
-        cond.add(new Command("MLZ", test, new Arg("begin" + loop,
-            delaySlots + 1), new Arg(address.get(ProgramCounter))));
+        cond.add(new Command("MLZ", test, new Arg("begin" + loop, 2), new Arg(
+            address.get(ProgramCounter))));
       } else if (op.equals("!=")) {
         if (arg2.mode == 0 && arg2.val == 0) {
           test = arg1;
@@ -567,27 +584,20 @@ public class Compiler {
           test.mode++;
           cond.add(new Command("SUB", arg1, arg2, testdest));
         }
-        cond.add(new Command("MNZ", test, new Arg("begin" + loop,
-            delaySlots + 1), new Arg(address.get(ProgramCounter))));
+        cond.add(new Command("MNZ", test, new Arg("begin" + loop, 2), new Arg(
+            address.get(ProgramCounter))));
       }
-      if (optimizeDelay) {
-        compileDelaySlots(ROM);
-        int endloc = cond.size() - 1;
-        if (endloc > delaySlots) {
-          endloc = delaySlots;
-        }
-        cond.get(endloc).tags.add("end" + loop);
-        for (int i = 0; i < endloc; i++) {
-          ROM.set(ROM.size() - delaySlots + i, cond.get(i));
-        }
-        compileDelaySlots(cond);
-        loop.commands = cond;
-      } else {
-        compileDelaySlots(ROM);
-        cond.get(0).tags.add("end" + loop);
-        compileDelaySlots(cond);
-        loop.commands = cond;
+      compileDelaySlot(ROM);
+      int endloc = cond.size() - 1;
+      if (endloc > 1) {
+        endloc = 1;
       }
+      cond.get(endloc).tags.add("end" + loop);
+      for (int i = 0; i < endloc; i++) {
+        ROM.set(ROM.size() - 1 + i, cond.get(i));
+      }
+      compileDelaySlot(cond);
+      loop.commands = cond;
 
     } else if (type.equals("if")) {
       ROM.addAll(cond);
@@ -624,8 +634,8 @@ public class Compiler {
         }
         ROM.add(new Command("MNZ", test, new Arg("end" + loop, 1), new Arg(
             address.get(ProgramCounter))));
-        compileDelaySlots(ROM);
-        ROM.get(ROM.size() - delaySlots - 1).tags.add("begin" + loop);
+        compileDelaySlot(ROM);
+        ROM.get(ROM.size() - 2).tags.add("begin" + loop);
       } else if (op.equals(">=") || op.equals("<=")) {
         if (op.equals("<=")) {
           Arg temp = arg1;
@@ -644,8 +654,8 @@ public class Compiler {
         }
         ROM.add(new Command("MLZ", test, new Arg("end" + loop, 1), new Arg(
             address.get(ProgramCounter))));
-        compileDelaySlots(ROM);
-        ROM.get(ROM.size() - delaySlots - 1).tags.add("begin" + loop);
+        compileDelaySlot(ROM);
+        ROM.get(ROM.size() - 2).tags.add("begin" + loop);
       } else if (op.equals(">") || op.equals("<")) {
         if (op.equals("<")) {
           Arg temp = arg1;
@@ -662,8 +672,8 @@ public class Compiler {
         ROM.add(new Command("SUB", test, arg2, testdest));
         ROM.add(new Command("MLZ", test, new Arg("end" + loop, 1), new Arg(
             address.get(ProgramCounter))));
-        compileDelaySlots(ROM);
-        ROM.get(ROM.size() - delaySlots - 1).tags.add("begin" + loop);
+        compileDelaySlot(ROM);
+        ROM.get(ROM.size() - 2).tags.add("begin" + loop);
       }
     }
   }
@@ -690,12 +700,12 @@ public class Compiler {
         }
         ROM.add(new Command("MLZ", new Arg(-1), new Arg("end" + loop2, 1),
             new Arg(address.get(ProgramCounter)), "begin" + loop2));
-        compileDelaySlots(ROM);
+        compileDelaySlot(ROM);
       }
     }
     if (loop.type.equals("if") || loop.type.equals("else")
         || loop.type.equals("sub")) {
-      if (prevCall == null) {
+      if (prevCall == null || loop.commands.size() > 0) {
         ROM.get(ROM.size() - 1).tags.add("end" + loop);
       } else {
         prevCall.tags.add("end" + loop);
@@ -1041,6 +1051,45 @@ public class Compiler {
         ROM.add(new Command("SRL", arg1, arg2, arg3));
       } else if (op.equals(">>")) {
         ROM.add(new Command("SRA", arg1, arg2, arg3));
+      } else if (op.equals("*")) {
+        int ID = OpenLoop.nextLoopID++;
+        Arg tempA = null;
+        if (arg1.scratches == null || arg1.scratches.size() == 0) {
+          tempA = mallocS();
+        } else {
+          tempA = arg1.scratches.get(0);
+        }
+        ROM.add(new Command("SUB", new Arg(0), arg1, tempA, "beginMult" + ID));
+        Arg tempB = null;
+        if (arg2.scratches == null || arg2.scratches.size() == 0) {
+          tempB = mallocS();
+        } else {
+          tempB = arg2.scratches.get(0);
+        }
+        ROM.add(new Command("ADD", new Arg(0), arg2, tempB));
+
+        Arg tempAr = tempA.dup();
+        tempAr.mode++;
+        Arg tempBr = tempB.dup();
+        tempBr.mode++;
+
+        ROM.add(new Command("MLZ", tempAr, new Arg("endMult" + ID, -1),
+            new Arg(address.get(ProgramCounter))));
+        ROM.add(new Command("MLZ", new Arg(-1), new Arg(0), arg3));
+        ROM.add(new Command("SUB", new Arg(0), tempAr, tempA));
+
+        ROM.add(new Command("MLZ", new Arg(-1), new Arg("endMult" + ID, -1),
+            new Arg(address.get(ProgramCounter))));
+        ROM.add(new Command("SUB", new Arg(0), tempBr, tempB));
+
+        Arg arg3r = arg3.dup();
+        arg3r.mode++;
+        ROM.add(new Command("ADD", arg3r, tempBr, arg3));
+        ROM.add(new Command("MLZ", tempAr, new Arg("endMult" + ID, -2),
+            new Arg(address.get(ProgramCounter))));
+        ROM.add(new Command("ADD", tempAr, new Arg(1), tempA, "endMult" + ID));
+      } else {
+        System.err.println("error: unrecognized operation " + op);
       }
     }
   }
@@ -1103,10 +1152,8 @@ public class Compiler {
    * @param ROM
    *          command sequence to add delay slots to
    */
-  public static void compileDelaySlots(ArrayList<Command> ROM) {
-    for (int i = 0; i < delaySlots; i++) {
-      ROM.add(new Command("MLZ", new Arg(0), new Arg(0), new Arg(0)));
-    }
+  public static void compileDelaySlot(ArrayList<Command> ROM) {
+    ROM.add(new Command("MLZ", new Arg(0), new Arg(0), new Arg(0)));
   }
 
   /**
@@ -1137,37 +1184,19 @@ public class Compiler {
     }
     ROM.add(new Command("MLZ", new Arg(-1), new Arg("end" + loop, 1), new Arg(
         ProgramCounter, 0)));
-    compileDelaySlots(ROM);
-    ROM.add(new Command("ADD", new Arg(sub.firstFreeRAM), new Arg(1, name, 0),
-        new Arg(CallStackPointer, 0), "begin" + loop));
+    compileDelaySlot(ROM);
+    ROM.get(ROM.size() - 1).tags.add("begin" + loop);
     // sub.print();
-    if (optimizeDelay && delaySlots == 1) {
-      Arg temp = mallocS();
-      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(1, name, 0),
-          new Arg(CallStackPointer, 0)));
-      loop.commands.add(new Command("ADD", new Arg(1), new Arg(1, name, 0),
-          temp));
-      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, name, 0),
-          new Arg(address.get(ProgramCounter))));
-      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, temp.val),
-          new Arg(0, name, 0)));
-      freeS(temp);
-    } else {
-      Arg temp = mallocS();
-      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(1, name, 0),
-          new Arg(CallStackPointer, 0)));
-
-      loop.commands.add(new Command("ADD", new Arg(1), new Arg(1, name, 0),
-          temp));
-      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, temp.val),
-          new Arg(0, name, 0)));
-
-      loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2,
-          CallStackPointer, 0), new Arg(address.get(ProgramCounter))));
-      compileDelaySlots(ROM);
-
-      freeS(temp);
-    }
+    Arg temp = mallocS();
+    loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(1, name, 0),
+        new Arg(CallStackPointer, 0)));
+    loop.commands
+        .add(new Command("ADD", new Arg(1), new Arg(1, name, 0), temp));
+    loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, name, 0),
+        new Arg(address.get(ProgramCounter))));
+    loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(2, temp.val),
+        new Arg(0, name, 0)));
+    freeS(temp);
     tokens.remove(0); // {
   }
 
@@ -1181,10 +1210,18 @@ public class Compiler {
     subs.clear();
     subs.addAll(call.cursubs);
     ArrayList<Command> tempROM = new ArrayList<Command>();
+    ArrayList<Command> pointerROM = new ArrayList<Command>();
     tokens.addAll(0, call.statement);
     tokens.remove(0); // call
-    Arg pointer = compileRef(tempROM, true);
-    tokens.remove(0); // =
+    Arg pointer = null;
+    String eq = null;
+    if (call.pointerName() == null) {
+      pointer = mallocS();
+    } else {
+      pointer = compileRef(pointerROM, true);
+      eq = tokens.remove(0); // =
+      tempROM.addAll(pointerROM);
+    }
     String subName = tokens.remove(0);
     Subroutine sub = subroutine.get(subName);
     if (sub == null) {
@@ -1209,7 +1246,7 @@ public class Compiler {
     int argnum = 2; // the first two are call return and previous instance
     // holds commands until after change-of-scope
     ArrayList<Command> defArgROM = new ArrayList<Command>();
-    for (; !tokens.get(0).equals(";"); argnum++) {
+    for (; !tokens.get(0).equals(";") && !tokens.get(0).equals("."); argnum++) {
       if (tokens.get(0).equals(",")) {
         tokens.remove(0);
         defArgROM.addAll(sub.inits.get(argnum));
@@ -1218,9 +1255,11 @@ public class Compiler {
 
         String varName = tokens.get(0);
         if (tokens.get(1).equals("[")) {
-
+          System.err.println("error: unsupported argument type at "
+              + rmStatement());
         } else if (arrayType.equals(varName)) {
-
+          System.err.println("error: unsupported argument type at "
+              + rmStatement());
         } else {
           Arg source = compileRef(tempROM, false);
           tokens.remove(0); // , or )
@@ -1247,16 +1286,50 @@ public class Compiler {
     for (; argnum < sub.args.size(); argnum++) {
       tempROM.addAll(sub.inits.get(argnum));
     }
-    tokens.remove(0); // ;
-    tempROM.add(new Command("MLZ", new Arg(-1), new Arg("begin" + sub.loop, 0),
+    tempROM.add(new Command("MLZ", new Arg(-1), new Arg("begin" + sub.loop, 1),
         new Arg(ProgramCounter, 0)));
-    compileDelaySlots(tempROM);
+    tempROM.add(new Command("ADD", new Arg(sub.firstFreeRAM), new Arg(1,
+        sub.name, 0), new Arg(CallStackPointer, 0)));
     tempROM.get(tempROM.size() - 1).tags.add("call" + ID + "_" + subName);
     tempROM.get(tempROM.size() - 1).tags.addAll(call.tags);
+
+    if (tokens.remove(0).equals(".")) {
+      String varname = "";
+      while (!tokens.get(0).equals(";")) {
+        varname += tokens.remove(0);
+      }
+      tokens.remove(0); // ;
+      tempROM.addAll(pointerROM);
+      if (eq.equals("=")) {
+        tempROM.add(new Command("ADD", new Arg(pointer.mode + 1, pointer.val),
+            new Arg(varname, 0, sub.name), pointer));
+        tempROM.add(new Command("MLZ", new Arg(-1), new Arg(pointer.mode + 2,
+            pointer.val), pointer));
+      } else {
+        System.err.println("error: call operator not supported: " + eq);
+      }
+
+    }
+
     ROM.addAll(call.loc, tempROM);
 
     subs.clear();
     subs.addAll(oldsubs);
+  }
+
+  static void compileReturn(ArrayList<Command> ROM) {
+    tokens.remove(0); // return
+    if (subs.size() == 0) {
+      System.err.println("error: invalid return at " + rmStatement());
+    }
+    Subroutine sub = subs.get(0);
+    if (tokens.get(0).equals(";")) {
+      tokens.remove(0);
+      for (Command c : sub.loop.commands) {
+        ROM.add(c.dupWithoutTags());
+      }
+    }
+
   }
 
   /**
@@ -1277,7 +1350,7 @@ public class Compiler {
       return false;
     }
     if (a.mode == 0 && !isDest) {
-      if (a.val > Short.MAX_VALUE || a.val < Short.MIN_VALUE) {
+      if (a.val > 65535 || a.val < Short.MIN_VALUE) {
         System.err
             .println("warning: potential 2's complement overflow at " + a);
         return false;
