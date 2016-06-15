@@ -1,6 +1,16 @@
-my tree;
-sub bob (valA = 47, valB = 152, sum){
-  sum = valA + valB;
+# recursively calculate the 10th Fibonacci number
+my res;
+call res = fib(10);
+display = res.sum;
+sub fib(cur,prev,sum){
+  if(cur <= 2){
+    sum = 1;
+  } else {
+    cur--;
+    call prev = fib(cur);
+    sum = prev.sum;
+    cur--;
+    call prev = fib(cur);
+    sum += prev.sum;
+  }
 }
-call tree = bob();
-display = tree.sum;
