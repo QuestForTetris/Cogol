@@ -1,9 +1,12 @@
+import java.util.ArrayList;
+
 public class Command {
   String opcode;
   Arg arg1;
   Arg arg2;
   Arg arg3;
-  String tag;
+  // String tag;
+  ArrayList<String> tags = new ArrayList<String>();
 
   public Command(String opcode, Arg arg1, Arg arg2, Arg arg3) {
     super();
@@ -19,7 +22,7 @@ public class Command {
     this.arg1 = arg1.dup();
     this.arg2 = arg2.dup();
     this.arg3 = arg3.dup();
-    this.tag = tag;
+    this.tags.add(tag);
   }
 
   /**
@@ -72,7 +75,7 @@ public class Command {
 
   public String toString() {
     String res = opcode + " " + arg1 + " " + arg2 + " " + arg3 + ";";
-    if (tag != null) {
+    for (String tag : tags) {
       res += " " + tag;
     }
     return res;
