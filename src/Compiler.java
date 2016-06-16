@@ -339,6 +339,8 @@ public class Compiler {
           compileDef();
         } else if (tokens.get(0).equals("if") || tokens.get(0).equals("while")) {
           compileLoopStart(mainROM);
+        } else if (tokens.get(0).equals("do")) {
+          compileDoWhile(mainROM);
         } else if (tokens.get(0).equals("sub")) {
           compileSub(mainROM);
         } else if (tokens.get(0).equals("}")) {
@@ -703,8 +705,80 @@ public class Compiler {
         compileDelaySlot(ROM);
       }
     }
+    if (loop.type.equals("doWhile")) {
+      tokens.remove(0); // while
+      tokens.remove(0); // (
+      Arg arg1 = compileRef(ROM, false);
+      String op = tokens.remove(0);
+      Arg arg2 = new Arg(0);
+      if (op.equals(")")) {
+        op = "!=";
+      } else {
+        arg2 = compileRef(ROM, false);
+        tokens.remove(0); // )
+      }
+      tokens.remove(0); // ;
+      Arg test = null;
+      if (arg2.mode == 0 && op.equals("<=")) {
+        arg2.val++;
+        op = "<";
+      }
+      if (arg1.mode == 0 && op.equals("<=")) {
+        arg1.val--;
+        op = "<";
+      }
+      if (arg2.mode == 0 && op.equals(">=")) {
+        arg2.val--;
+        op = ">";
+      }
+      if (arg1.mode == 0 && op.equals(">=")) {
+        arg1.val++;
+        op = ">";
+      }
+      if (op.equals("<") || op.equals(">") || op.equals("<=")
+          || op.equals(">=")) {
+        if (op.startsWith(">")) {
+          Arg temp = arg1;
+          arg1 = arg2;
+          arg2 = temp;
+        }
+        if (arg2.mode == 0 && arg2.val == 0) {
+          test = arg1;
+        } else {
+          if (!op.endsWith("=")) {
+            freeS(arg1);
+          }
+          freeS(arg2);
+          Arg testdest = mallocS();
+          test = testdest.dup();
+          test.mode++;
+          if (op.endsWith("=")) {
+            ROM.add(new Command("ADD", arg2, new Arg(1), testdest));
+          }
+          ROM.add(new Command("SUB", arg1, arg2, testdest));
+        }
+        ROM.add(new Command("MLZ", test, new Arg("begin" + loop, 1), new Arg(
+            address.get(ProgramCounter))));
+      } else if (op.equals("!=")) {
+        if (arg2.mode == 0 && arg2.val == 0) {
+          test = arg1;
+        } else if (arg1.mode == 0 && arg1.val == 0) {
+          test = arg2;
+        } else {
+          freeS(arg1);
+          freeS(arg2);
+          Arg testdest = mallocS();
+          test = testdest.dup();
+          test.mode++;
+          ROM.add(new Command("SUB", arg1, arg2, testdest));
+        }
+        ROM.add(new Command("MNZ", test, new Arg("begin" + loop, 1), new Arg(
+            address.get(ProgramCounter))));
+      }
+      compileDelaySlot(ROM);
+    }
     if (loop.type.equals("if") || loop.type.equals("else")
-        || loop.type.equals("sub")) {
+        || loop.type.equals("sub") || loop.type.equals("doWhile")) {
       if (prevCall == null || loop.commands.size() > 0) {
         ROM.get(ROM.size() - 1).tags.add("end" + loop);
       } else {
@@ -1148,6 +1222,25 @@ public class Compiler {
     return res;
   }
 
+  public static void compileDoWhile(ArrayList<Command> ROM) {
+    OpenLoop loop = new OpenLoop("doWhile");
+    tokens.remove(0); // do
+    String oBrace = tokens.remove(0);
+    while (!oBrace.equals("{")) {
+      loop.name += "_" + oBrace;
+      oBrace = tokens.remove(0);
+    }
+    loops.add(0, loop);
+    if (prevCall == null) {
+      if (ROM.size() == 0) {
+        compileDelaySlot(ROM); // kinda hacky
+      }
+      ROM.get(ROM.size() - 1).tags.add("begin" + loop);
+    } else {
+      prevCall.tags.add("begin" + loop);
+    }
+  }
+
   /**
    * @param ROM
    *          command sequence to add delay slots to
@@ -1186,7 +1279,6 @@ public class Compiler {
         ProgramCounter, 0)));
     compileDelaySlot(ROM);
     ROM.get(ROM.size() - 1).tags.add("begin" + loop);
-    // sub.print();
     Arg temp = mallocS();
     loop.commands.add(new Command("MLZ", new Arg(-1), new Arg(1, name, 0),
         new Arg(CallStackPointer, 0)));
