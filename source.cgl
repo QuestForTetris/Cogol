@@ -1,16 +1,12 @@
 # recursively calculate the 10th Fibonacci number
-my res;
-call res = fib(10);
-display = res.sum;
-sub fib(cur,prev,sum){
+call display = fib(10).sum;
+sub fib(cur,sum){
   if(cur <= 2){
     sum = 1;
-  } else {
-    cur--;
-    call prev = fib(cur);
-    sum = prev.sum;
-    cur--;
-    call prev = fib(cur);
-    sum += prev.sum;
+    return;
   }
+  cur--;
+  call sum = fib(cur).sum;
+  cur--;
+  call sum += fib(cur).sum;
 }
