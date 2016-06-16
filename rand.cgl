@@ -1,0 +1,19 @@
+# output random values from 1 to 7, inclusive
+my randval; 
+my rand = 1; 
+do {
+  do {
+    call rand = random(rand).result;
+    randval = rand & 7;
+  } while(randval < 1);
+  display = randval;
+} while (1);
+
+sub random(result, shifted) {
+  shifted = result << 15; # or 1
+  result ^= shifted; 
+  shifted = result >>> 7; # or 5
+  result ^= shifted; 
+  shifted = result << 2;
+  result ^= shifted; 
+}
