@@ -94,6 +94,16 @@ The condition can be (almost) any conditional statement, as describe above.  The
     }
 Similarly to IF statements, the condition can be (almost) any conditional statement.  The label also has no effect.
 
+### DO-WHILE statements
+
+These are similar to a while loop, except the body is always executed at least once.
+
+    do optional label {
+      ... body ...
+    } while (cond);
+
+They are constructed very similarly to while loops and have similar suppport for conditions.
+
 ### Subroutine declarations
 
 Subroutines are declared in the following syntax.
@@ -107,7 +117,10 @@ The variables declared in the signature are local variables, and can be accessed
 
 Subroutines are called using the following syntax.
 
-    call myPointer = example(args);
+    call myPointer = example(args); # returns a pointer
+    call example(args); # returns nothing, useful for changing global variables
+    call myResult = example(args).somevariable; # returns the value of the desired local variable
+    call mySum += example(args).res; # adds result.  Also supported are -= &= |= ^= &!= <<= >>>= >>=
 This runs the subroutine `example` with the specified arguments.  The variable `myPointer` is loaded with a pointer to the results.  The variable `myPointer` must have been previously declared, either as a global or local variable.  Curently, only words can serve as pointers, not array indices.
 
 *At this time, only words as arguments in calls are supported, so things like `example(arg,arg2)` or `example()` work.*
