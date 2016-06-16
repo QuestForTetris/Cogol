@@ -203,11 +203,11 @@ public class Compiler {
    * @param data
    *          Initializer constant.
    */
-  public static void createWord(String name, int data) {
+  public static void createWord(ArrayList<Command> ROM, String name, int data) {
     setRAM(firstFreeRAM, name);
     type.put(name, wordType);
     if (data != 0) {
-      ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(data), new Arg(
+      ROM.add(new Command("MLZ", new Arg(-1), new Arg(data), new Arg(
           firstFreeRAM)));
     }
     firstFreeRAM++;
@@ -219,7 +219,7 @@ public class Compiler {
    * @param size
    *          Reserved size of array
    */
-  public static void createArray(String name, int size) {
+  public static void createArray(ArrayList<Command> ROM, String name, int size) {
     setRAM(firstFreeRAM, name);
     type.put(name, arrayType);
     firstFreeRAM++;
@@ -227,8 +227,8 @@ public class Compiler {
       setRAM(firstFreeRAM, name + "[" + i + "]");
       firstFreeRAM++;
     }
-    ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(
-        address.get(name) + 1), new Arg(address.get(name))));
+    ROM.add(new Command("MLZ", new Arg(-1), new Arg(address.get(name) + 1),
+        new Arg(address.get(name))));
   }
 
   /**
@@ -239,7 +239,8 @@ public class Compiler {
    * @param data
    *          Initializer constants
    */
-  public static void createArray(String name, int size, ArrayList<Integer> data) {
+  public static void createArray(ArrayList<Command> ROM, String name, int size,
+      ArrayList<Integer> data) {
     setRAM(firstFreeRAM, name);
     type.put(name, arrayType);
     firstFreeRAM++;
@@ -248,8 +249,8 @@ public class Compiler {
       if (data.size() > 0) {
         int datum = data.remove(0);
         if (datum != 0) {
-          ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(datum),
-              new Arg(firstFreeRAM)));
+          ROM.add(new Command("MLZ", new Arg(-1), new Arg(datum), new Arg(
+              firstFreeRAM)));
         }
       }
       firstFreeRAM++;
@@ -260,14 +261,13 @@ public class Compiler {
       setRAM(marker, name + "[" + index + "]");
       int datum = data.remove(0);
       if (datum != 0) {
-        ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(datum), new Arg(
-            marker)));
+        ROM.add(new Command("MLZ", new Arg(-1), new Arg(datum), new Arg(marker)));
       }
       marker++;
       index++;
     }
-    ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(
-        address.get(name) + 1), new Arg(address.get(name))));
+    ROM.add(new Command("MLZ", new Arg(-1), new Arg(address.get(name) + 1),
+        new Arg(address.get(name))));
   }
 
   /**
@@ -312,6 +312,10 @@ public class Compiler {
    */
   public static void compile() {
     ArrayList<CallStatement> calls = new ArrayList<CallStatement>();
+
+    mainROM.add(new Command("MLZ", new Arg(-1), new Arg(CallStackPointer, 1),
+        new Arg(CallStackPointer, 0), "preloadCallStack"));
+
     while (tokens.size() > 0) {
       clearS();
       if (tokens.get(0).equals("call")) {
@@ -358,6 +362,9 @@ public class Compiler {
       clearS();
       compileCall(mainROM, calls.get(i));
     }
+    setRAM(firstFreeRAM, CallStackPointer);
+    type.put(CallStackPointer, arrayType);
+    firstFreeRAM++;
   }
 
   static class CallStatement {
@@ -399,7 +406,6 @@ public class Compiler {
    * replaced by more complex joining code
    */
   public static void joinParts() {
-    createArray(CallStackPointer, 0);
     mainROM.addAll(0, ROMpredefs);
   }
 
@@ -835,22 +841,22 @@ public class Compiler {
               System.err.println("Error: non-constant initilizer at my " + name
                   + "[" + size + "] = ... " + init);
             }
-            createArray(name, size, inits);
+            createArray(ROMpredefs, name, size, inits);
             tokens.remove(0); // ;
           } else {
             System.err.println("Error: invalid initilizer at my " + name + "["
                 + size + "] = ... " + init + rmStatement());
-            createArray(name, size, inits);
+            createArray(ROMpredefs, name, size, inits);
           }
         } else {
-          createArray(name, size);
+          createArray(ROMpredefs, name, size);
         }
       } else if (type.equals(";")) {
         createWord(name);
       } else if (type.equals("=")) {
         Arg init = compileRef(ROM, false);
         if (init.mode == 0 && tokens.get(0).equals(";")) {
-          createWord(name, init.val);
+          createWord(ROMpredefs, name, init.val);
           tokens.remove(0); // ;
         } else {
           createWord(name);
