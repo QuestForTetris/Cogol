@@ -383,8 +383,7 @@ public class Compiler {
     }
 
     String pointerName() {
-      int eqloc = statement.indexOf("=");
-      if (eqloc > -1) {
+      if (eqIndex() > -1) {
         return statement.get(1);
       } else {
         return null;
@@ -392,13 +391,23 @@ public class Compiler {
     }
 
     String subName() {
-      int eqloc = statement.indexOf("=");
+      int eqloc = eqIndex();
       if (eqloc > -1) {
         return statement.get(eqloc + 1);
       } else {
         return statement.get(1);
       }
     }
+
+    int eqIndex() {
+      for (int i = 0; i < statement.size(); i++) {
+        if (statement.get(i).endsWith("=")) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
   }
 
   /**
@@ -1395,7 +1404,6 @@ public class Compiler {
     tempROM.add(new Command("ADD", new Arg(sub.firstFreeRAM), new Arg(1,
         sub.name, 0), new Arg(CallStackPointer, 0)));
     tempROM.get(tempROM.size() - 1).tags.add("call" + ID + "_" + subName);
-    tempROM.get(tempROM.size() - 1).tags.addAll(call.tags);
 
     if (tokens.remove(0).equals(".")) {
       String varname = "";
@@ -1404,19 +1412,49 @@ public class Compiler {
       }
       tokens.remove(0); // ;
       tempROM.addAll(pointerROM);
+      temp = mallocS();
+      Arg theOGpointerR = theOGpointer.dup();
+      theOGpointerR.mode++;
+      tempROM.add(new Command("ADD", new Arg(1, CallStackPointer, 0), new Arg(
+          varname, 0, sub.name), temp));
       if (eq.equals("=")) {
-        temp = mallocS();
-        tempROM.add(new Command("ADD", new Arg(1, CallStackPointer, 0),
-            new Arg(varname, 0, sub.name), temp));
         tempROM.add(new Command("MLZ", new Arg(-1), new Arg(2, temp.val),
             theOGpointer));
-        freeS(temp);
+      } else if (eq.equals("+=")) {
+        tempROM.add(new Command("ADD", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
+      } else if (eq.equals("-=")) {
+        tempROM.add(new Command("SUB", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
+      } else if (eq.equals("&=")) {
+        tempROM.add(new Command("AND", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
+      } else if (eq.equals("|=")) {
+        tempROM.add(new Command("OR", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
+      } else if (eq.equals("^=")) {
+        tempROM.add(new Command("XOR", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
+      } else if (eq.equals("&!=")) {
+        tempROM.add(new Command("ANT", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
+      } else if (eq.equals("<<=")) {
+        tempROM.add(new Command("SL", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
+      } else if (eq.equals(">>>=")) {
+        tempROM.add(new Command("SRL", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
+      } else if (eq.equals(">>=")) {
+        tempROM.add(new Command("SRA", theOGpointerR, new Arg(2, temp.val),
+            theOGpointer));
       } else {
         System.err.println("error: call operator not supported: " + eq);
       }
+      freeS(temp);
 
     }
 
+    tempROM.get(tempROM.size() - 1).tags.addAll(call.tags);
     ROM.addAll(call.loc, tempROM);
 
     subs.clear();
