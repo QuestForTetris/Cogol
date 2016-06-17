@@ -1,12 +1,109 @@
-# recursively calculate the 10th Fibonacci number
-call display = fib(10).sum;
-sub fib(cur,sum){
-  if(cur <= 2){
-    sum = 1;
-    return;
-  }
-  cur--;
-  call sum = fib(cur).sum;
-  cur--;
-  call sum += fib(cur).sum;
+
+# output random values from 1 to 7, inclusive
+my randval;
+my rand = 1;
+#do {
+  do {
+    call random();
+    randval = rand & 7;
+  } while(randval < 1);
+  display = randval;
+#} while (1);
+
+
+my shifted;
+sub random() {
+  shifted = rand << 1;
+  rand ^= shifted;
+  shifted = rand >>> 5;
+  rand ^= shifted;
+  shifted = rand << 2;
+  rand ^= shifted;
+}
+
+my x[4] = {5,6,6,7};
+my y[4] = {4,4,3,3};
+my xt[4];
+my yt[4];
+
+call rotateClockwise();
+
+call genTestBoard();
+
+sub rotateClockwise(){
+  xt[0] = y[0] - y[1];
+  xt[0] += x[1];
+  yt[0] = x[1] - x[0];
+  yt[0] += y[1];
+  xt[1] = x[1];
+  yt[1] = y[1];
+  xt[2] = y[2] - y[1];
+  xt[2] += x[1];
+  yt[2] = x[1] - x[2];
+  yt[2] += y[1];
+  xt[3] = y[3] - y[1];
+  xt[3] += x[1];
+  yt[3] = x[1] - x[3];
+  yt[3] += y[1];
+  x[0] = xt[0];
+  y[0] = yt[0];
+  x[1] = xt[1];
+  y[1] = yt[1];
+  x[2] = xt[2];
+  y[2] = yt[2];
+  x[3] = xt[3];
+  y[3] = yt[3];
+}
+
+my deadboard[22];
+my liveboard[22];
+my testboard[22];
+my row;
+my i;
+
+sub genTestBoard(){
+  # loop unrolling because loops are slow
+  # since these are all static addresses
+  # they are optimized by the compiler
+  # to be one instruction per line
+  testboard[0] = 0;
+  testboard[1] = 0;
+  testboard[2] = 0;
+  testboard[3] = 0;
+  testboard[4] = 0;
+  testboard[5] = 0;
+  testboard[6] = 0;
+  testboard[7] = 0;
+  testboard[8] = 0;
+  testboard[9] = 0;
+  testboard[10] = 0;
+  testboard[11] = 0;
+  testboard[12] = 0;
+  testboard[13] = 0;
+  testboard[14] = 0;
+  testboard[15] = 0;
+  testboard[16] = 0;
+  testboard[17] = 0;
+  testboard[18] = 0;
+  testboard[19] = 0;
+  testboard[20] = 0;
+  testboard[21] = 0;
+  shifted = 1 << xt[0];
+  testboard[yt[0]] |= shifted;
+  shifted = 1 << xt[1];
+  testboard[yt[1]] |= shifted;
+  shifted = 1 << xt[2];
+  testboard[yt[2]] |= shifted;
+  shifted = 1 << xt[3];
+  testboard[yt[3]] |= shifted;
+}
+
+my collision;
+sub collisionTest(){
+  i = 0;
+  do {
+    shifted = 1 << xt[i];
+    testboard[yt[i]] |= shifted;
+    i++;
+  } while (i < 4);
 }
