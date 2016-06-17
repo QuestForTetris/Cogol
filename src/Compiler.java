@@ -31,7 +31,7 @@ public class Compiler {
       outputfile = args[1];
     }
     PrintWriter out = new PrintWriter(new File(outputfile));
-    
+
     System.out.println("\nSource Cogol:");
     while (in.hasNextLine()) {
       String line = in.nextLine();
@@ -49,7 +49,7 @@ public class Compiler {
     System.out.println("\nCompiled QFTASM:");
     for (int i = 0; i < mainROM.size(); i++) {
       System.out.println(i + ". " + mainROM.get(i));
-      if(i > 0){
+      if (i > 0) {
         out.println();
       }
       out.print(i + ". " + mainROM.get(i));
@@ -352,6 +352,7 @@ public class Compiler {
         calls.add(0, call);
         prevCall = call;
       } else {
+        int startsize = mainROM.size();
         if (tokens.get(0).equals("my")) {
           compileDef();
         } else if (tokens.get(0).equals("if") || tokens.get(0).equals("while")) {
@@ -368,7 +369,9 @@ public class Compiler {
         } else {
           compileMove(mainROM);
         }
-        prevCall = null;
+        if (mainROM.size() > startsize) {
+          prevCall = null;
+        }
       }
     }
     for (int i = 0; i < calls.size(); i++) {
@@ -1267,6 +1270,7 @@ public class Compiler {
     } else {
       prevCall.tags.add("begin" + loop);
     }
+
   }
 
   /**
