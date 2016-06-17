@@ -619,6 +619,9 @@ public class Compiler {
         }
         cond.add(new Command("MNZ", test, new Arg("begin" + loop, 2), new Arg(
             address.get(ProgramCounter))));
+      } else {
+        System.err.println("error: condition " + type + " " + op
+            + " not supported");
       }
       compileDelaySlot(ROM);
       int endloc = cond.size() - 1;
@@ -707,6 +710,9 @@ public class Compiler {
             address.get(ProgramCounter))));
         compileDelaySlot(ROM);
         ROM.get(ROM.size() - 2).tags.add("begin" + loop);
+      } else {
+        System.err.println("error: condition " + type + " " + op
+            + " not supported");
       }
     }
   }
@@ -805,6 +811,8 @@ public class Compiler {
         }
         ROM.add(new Command("MNZ", test, new Arg("begin" + loop, 1), new Arg(
             address.get(ProgramCounter))));
+      } else {
+        System.err.println("error: condition doWhile " + op + " not supported");
       }
       compileDelaySlot(ROM);
     }
@@ -1228,6 +1236,8 @@ public class Compiler {
       arg1 = arg2;
       arg2 = temp;
       res.type = 1;
+    } else {
+      System.err.println("error: in-line condition " + op + " not supported");
     }
     if (arg1.mode == 0 && arg2.mode == 0) {
       System.err.println("warning: constant condition at " + arg1 + " " + op
