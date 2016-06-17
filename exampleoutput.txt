@@ -1,93 +1,607 @@
 
 Source Cogol:
-# recursively calculate the 10th Fibonacci number
-call display = fib(10).sum;
-sub fib(cur,sum){
-  if(cur <= 2){
-    sum = 1;
-    return;
+
+# output random values from 1 to 7, inclusive
+my randval;
+my rand = 1;
+#do {
+  do {
+    call random();
+    randval = rand & 7;
+  } while(randval < 1);
+  display = randval;
+#} while (1);
+
+
+my shifted;
+sub random() {
+  shifted = rand << 1;
+  rand ^= shifted;
+  shifted = rand >>> 5;
+  rand ^= shifted;
+  shifted = rand << 2;
+  rand ^= shifted;
+}
+
+my x[4] = {5,6,6,7};
+my y[4] = {10,10,9,9};
+my xt[4];
+my yt[4];
+
+call clearBoard();
+
+call rotateClockwise();
+my collision;
+call collisionTest();
+while (collision < 1){
+  call updateLive();
+  call genLiveBoard();
+  call rotateClockwise();
+  call collisionTest();
+  if(collision == 0){
+    call updateLive();
+    call genLiveBoard();
   }
-  cur--;
-  call sum = fib(cur).sum;
-  cur--;
-  call sum += fib(cur).sum;
+  call moveDown();
+  call collisionTest();
+  display = collision;
+}
+
+sub rotateClockwise(){
+  xt[0] = y[0] - y[1];
+  xt[0] += x[1];
+  yt[0] = x[1] - x[0];
+  yt[0] += y[1];
+  xt[1] = x[1];
+  yt[1] = y[1];
+  xt[2] = y[2] - y[1];
+  xt[2] += x[1];
+  yt[2] = x[1] - x[2];
+  yt[2] += y[1];
+  xt[3] = y[3] - y[1];
+  xt[3] += x[1];
+  yt[3] = x[1] - x[3];
+  yt[3] += y[1];
+}
+
+sub moveRight(){
+  xt[0] = x[0] + 1;
+  xt[1] = x[1] + 1;
+  xt[2] = x[2] + 1;
+  xt[3] = x[3] + 1;
+}
+
+sub moveLeft(){
+  xt[0] = x[0] - 1;
+  xt[1] = x[1] - 1;
+  xt[2] = x[2] - 1;
+  xt[3] = x[3] - 1;
+}
+
+sub moveDown(){
+  yt[0] = y[0] - 1;
+  yt[1] = y[1] - 1;
+  yt[2] = y[2] - 1;
+  yt[3] = y[3] - 1;
+}
+
+sub updateLive(){
+  x[0] = xt[0];
+  y[0] = yt[0];
+  x[1] = xt[1];
+  y[1] = yt[1];
+  x[2] = xt[2];
+  y[2] = yt[2];
+  x[3] = xt[3];
+  y[3] = yt[3];
+}
+
+my deadboard[23];
+my liveboard[23];
+my row;
+my i;
+
+sub genLiveBoard(){
+  call clearPiece();
+  shifted = 1 << x[0];
+  liveboard[y[0]] |= shifted;
+  shifted = 1 << x[1];
+  liveboard[y[1]] |= shifted;
+  shifted = 1 << x[2];
+  liveboard[y[2]] |= shifted;
+  shifted = 1 << x[3];
+  liveboard[y[3]] |= shifted;
+}
+
+sub collisionTest(){
+  collision = deadboard[yt[0]] >>> xt[0];
+  shifted = deadboard[yt[1]] >>> xt[1];
+  collision |= shifted;
+  shifted = deadboard[yt[2]] >>> xt[2];
+  collision |= shifted;
+  shifted = deadboard[yt[3]] >>> xt[3];
+  collision |= shifted;
+  collision &= 1;
+}
+
+sub clearPiece(){
+  # loop unrolling because loops are slow
+  # since these are all static addresses
+  # they are optimized by the compiler
+  # to be one instruction per line
+  liveboard[0] = 0;
+  liveboard[1] = 0;
+  liveboard[2] = 0;
+  liveboard[3] = 0;
+  liveboard[4] = 0;
+  liveboard[5] = 0;
+  liveboard[6] = 0;
+  liveboard[7] = 0;
+  liveboard[8] = 0;
+  liveboard[9] = 0;
+  liveboard[10] = 0;
+  liveboard[11] = 0;
+  liveboard[12] = 0;
+  liveboard[13] = 0;
+  liveboard[14] = 0;
+  liveboard[15] = 0;
+  liveboard[16] = 0;
+  liveboard[17] = 0;
+  liveboard[18] = 0;
+  liveboard[19] = 0;
+  liveboard[20] = 0;
+  liveboard[21] = 0;
+  liveboard[22] = 0;
+}
+
+sub clearBoard(){
+  deadboard[0] = 65535;
+  deadboard[1] = 65535;
+  deadboard[2] = 57351;
+  deadboard[3] = 57351;
+  deadboard[4] = 57351;
+  deadboard[5] = 57351;
+  deadboard[6] = 57351;
+  deadboard[7] = 57351;
+  deadboard[8] = 57351;
+  deadboard[9] = 57351;
+  deadboard[10] = 57351;
+  deadboard[11] = 57351;
+  deadboard[12] = 57351;
+  deadboard[13] = 57351;
+  deadboard[14] = 57351;
+  deadboard[15] = 57351;
+  deadboard[16] = 57351;
+  deadboard[17] = 57351;
+  deadboard[18] = 57351;
+  deadboard[19] = 57351;
+  deadboard[20] = 57351;
+  deadboard[21] = 57351;
+  deadboard[22] = 57351;
 }
 
 Tokens:
-[call, display, =, fib, (, 10, ), ., sum, ;, sub, fib, (, cur, ,, sum, ), {, if, (, cur, <=, 2, ), {, sum, =, 1, ;, return, ;, }, cur, --, ;, call, sum, =, fib, (, cur, ), ., sum, ;, cur, --, ;, call, sum, +=, fib, (, cur, ), ., sum, ;, }]
+[my, randval, ;, my, rand, =, 1, ;, do, {, call, random, (, ), ;, randval, =, rand, &, 7, ;, }, while, (, randval, <, 1, ), ;, display, =, randval, ;, my, shifted, ;, sub, random, (, ), {, shifted, =, rand, <<, 1, ;, rand, ^=, shifted, ;, shifted, =, rand, >>>, 5, ;, rand, ^=, shifted, ;, shifted, =, rand, <<, 2, ;, rand, ^=, shifted, ;, }, my, x, [, 4, ], =, {, 5, ,, 6, ,, 6, ,, 7, }, ;, my, y, [, 4, ], =, {, 10, ,, 10, ,, 9, ,, 9, }, ;, my, xt, [, 4, ], ;, my, yt, [, 4, ], ;, call, clearboard, (, ), ;, call, rotateclockwise, (, ), ;, my, collision, ;, call, collisiontest, (, ), ;, while, (, collision, <, 1, ), {, call, updatelive, (, ), ;, call, genliveboard, (, ), ;, call, rotateclockwise, (, ), ;, call, collisiontest, (, ), ;, if, (, collision, ==, 0, ), {, call, updatelive, (, ), ;, call, genliveboard, (, ), ;, }, call, movedown, (, ), ;, call, collisiontest, (, ), ;, display, =, collision, ;, }, sub, rotateclockwise, (, ), {, xt, [, 0, ], =, y, [, 0, ], -, y, [, 1, ], ;, xt, [, 0, ], +=, x, [, 1, ], ;, yt, [, 0, ], =, x, [, 1, ], -, x, [, 0, ], ;, yt, [, 0, ], +=, y, [, 1, ], ;, xt, [, 1, ], =, x, [, 1, ], ;, yt, [, 1, ], =, y, [, 1, ], ;, xt, [, 2, ], =, y, [, 2, ], -, y, [, 1, ], ;, xt, [, 2, ], +=, x, [, 1, ], ;, yt, [, 2, ], =, x, [, 1, ], -, x, [, 2, ], ;, yt, [, 2, ], +=, y, [, 1, ], ;, xt, [, 3, ], =, y, [, 3, ], -, y, [, 1, ], ;, xt, [, 3, ], +=, x, [, 1, ], ;, yt, [, 3, ], =, x, [, 1, ], -, x, [, 3, ], ;, yt, [, 3, ], +=, y, [, 1, ], ;, }, sub, moveright, (, ), {, xt, [, 0, ], =, x, [, 0, ], +, 1, ;, xt, [, 1, ], =, x, [, 1, ], +, 1, ;, xt, [, 2, ], =, x, [, 2, ], +, 1, ;, xt, [, 3, ], =, x, [, 3, ], +, 1, ;, }, sub, moveleft, (, ), {, xt, [, 0, ], =, x, [, 0, ], -, 1, ;, xt, [, 1, ], =, x, [, 1, ], -, 1, ;, xt, [, 2, ], =, x, [, 2, ], -, 1, ;, xt, [, 3, ], =, x, [, 3, ], -, 1, ;, }, sub, movedown, (, ), {, yt, [, 0, ], =, y, [, 0, ], -, 1, ;, yt, [, 1, ], =, y, [, 1, ], -, 1, ;, yt, [, 2, ], =, y, [, 2, ], -, 1, ;, yt, [, 3, ], =, y, [, 3, ], -, 1, ;, }, sub, updatelive, (, ), {, x, [, 0, ], =, xt, [, 0, ], ;, y, [, 0, ], =, yt, [, 0, ], ;, x, [, 1, ], =, xt, [, 1, ], ;, y, [, 1, ], =, yt, [, 1, ], ;, x, [, 2, ], =, xt, [, 2, ], ;, y, [, 2, ], =, yt, [, 2, ], ;, x, [, 3, ], =, xt, [, 3, ], ;, y, [, 3, ], =, yt, [, 3, ], ;, }, my, deadboard, [, 23, ], ;, my, liveboard, [, 23, ], ;, my, row, ;, my, i, ;, sub, genliveboard, (, ), {, call, clearpiece, (, ), ;, shifted, =, 1, <<, x, [, 0, ], ;, liveboard, [, y, [, 0, ], ], |=, shifted, ;, shifted, =, 1, <<, x, [, 1, ], ;, liveboard, [, y, [, 1, ], ], |=, shifted, ;, shifted, =, 1, <<, x, [, 2, ], ;, liveboard, [, y, [, 2, ], ], |=, shifted, ;, shifted, =, 1, <<, x, [, 3, ], ;, liveboard, [, y, [, 3, ], ], |=, shifted, ;, }, sub, collisiontest, (, ), {, collision, =, deadboard, [, yt, [, 0, ], ], >>>, xt, [, 0, ], ;, shifted, =, deadboard, [, yt, [, 1, ], ], >>>, xt, [, 1, ], ;, collision, |=, shifted, ;, shifted, =, deadboard, [, yt, [, 2, ], ], >>>, xt, [, 2, ], ;, collision, |=, shifted, ;, shifted, =, deadboard, [, yt, [, 3, ], ], >>>, xt, [, 3, ], ;, collision, |=, shifted, ;, collision, &=, 1, ;, }, sub, clearpiece, (, ), {, liveboard, [, 0, ], =, 0, ;, liveboard, [, 1, ], =, 0, ;, liveboard, [, 2, ], =, 0, ;, liveboard, [, 3, ], =, 0, ;, liveboard, [, 4, ], =, 0, ;, liveboard, [, 5, ], =, 0, ;, liveboard, [, 6, ], =, 0, ;, liveboard, [, 7, ], =, 0, ;, liveboard, [, 8, ], =, 0, ;, liveboard, [, 9, ], =, 0, ;, liveboard, [, 10, ], =, 0, ;, liveboard, [, 11, ], =, 0, ;, liveboard, [, 12, ], =, 0, ;, liveboard, [, 13, ], =, 0, ;, liveboard, [, 14, ], =, 0, ;, liveboard, [, 15, ], =, 0, ;, liveboard, [, 16, ], =, 0, ;, liveboard, [, 17, ], =, 0, ;, liveboard, [, 18, ], =, 0, ;, liveboard, [, 19, ], =, 0, ;, liveboard, [, 20, ], =, 0, ;, liveboard, [, 21, ], =, 0, ;, liveboard, [, 22, ], =, 0, ;, }, sub, clearboard, (, ), {, deadboard, [, 0, ], =, 65535, ;, deadboard, [, 1, ], =, 65535, ;, deadboard, [, 2, ], =, 57351, ;, deadboard, [, 3, ], =, 57351, ;, deadboard, [, 4, ], =, 57351, ;, deadboard, [, 5, ], =, 57351, ;, deadboard, [, 6, ], =, 57351, ;, deadboard, [, 7, ], =, 57351, ;, deadboard, [, 8, ], =, 57351, ;, deadboard, [, 9, ], =, 57351, ;, deadboard, [, 10, ], =, 57351, ;, deadboard, [, 11, ], =, 57351, ;, deadboard, [, 12, ], =, 57351, ;, deadboard, [, 13, ], =, 57351, ;, deadboard, [, 14, ], =, 57351, ;, deadboard, [, 15, ], =, 57351, ;, deadboard, [, 16, ], =, 57351, ;, deadboard, [, 17, ], =, 57351, ;, deadboard, [, 18, ], =, 57351, ;, deadboard, [, 19, ], =, 57351, ;, deadboard, [, 20, ], =, 57351, ;, deadboard, [, 21, ], =, 57351, ;, deadboard, [, 22, ], =, 57351, ;, }]
 
 Compiled QFTASM:
-0. MLZ -1 8 7; preloadCallStack
-1. ADD A7 1 4;
-2. MLZ -1 A3 A4;
-3. MLZ -1 A7 2;
-4. ADD A2 2 4;
-5. MLZ -1 10 A4;
-6. MLZ -1 A2 3;
-7. MLZ -1 10 A3;
-8. MLZ -1 14 0;
-9. ADD A3 4 7; call4_fib
-10. ADD A7 3 2;
-11. MLZ -1 B2 1;
-12. MLZ -1 58 0;
-13. MLZ 0 0 0; beginSub0_fib
-14. ADD A3 2 2;
-15. SUB 2 B2 2;
-16. MLZ A2 24 0; beginIf1
-17. MLZ 0 0 0;
-18. ADD A3 3 2;
-19. MLZ -1 1 A2;
-20. MLZ -1 A3 7;
-21. ADD A3 1 2;
-22. MLZ -1 B3 0;
-23. MLZ -1 B2 3; return endIf1
-24. ADD A3 2 2;
-25. ADD B2 -1 A2;
-26. ADD A7 1 5;
-27. MLZ -1 A3 A5;
-28. MLZ -1 A7 4;
-29. ADD A3 2 5;
-30. ADD A4 2 6;
-31. MLZ -1 B5 A6;
-32. MLZ -1 A4 3;
-33. MLZ -1 36 A3;
-34. MLZ -1 14 0;
-35. ADD A3 4 7; call3_fib
-36. ADD A3 3 2;
-37. ADD A7 3 4;
-38. MLZ -1 B4 A2;
-39. ADD A3 2 2;
-40. ADD B2 -1 A2;
-41. ADD A7 1 5;
-42. MLZ -1 A3 A5;
-43. MLZ -1 A7 4;
-44. ADD A3 2 5;
-45. ADD A4 2 6;
-46. MLZ -1 B5 A6;
-47. MLZ -1 A4 3;
-48. MLZ -1 51 A3;
-49. MLZ -1 14 0;
-50. ADD A3 4 7; call2_fib
-51. ADD A3 3 2;
-52. ADD A7 3 4;
-53. ADD B4 B2 A2;
-54. MLZ -1 A3 7;
-55. ADD A3 1 2;
-56. MLZ -1 B3 0;
-57. MLZ -1 B2 3; endSub0_fib
+0. MLZ -1 1 4;
+1. MLZ -1 5 8;
+2. MLZ -1 6 9;
+3. MLZ -1 6 10;
+4. MLZ -1 7 11;
+5. MLZ -1 8 7;
+6. MLZ -1 10 13;
+7. MLZ -1 10 14;
+8. MLZ -1 9 15;
+9. MLZ -1 9 16;
+10. MLZ -1 13 12;
+11. MLZ -1 18 17;
+12. MLZ -1 23 22;
+13. MLZ -1 34 33;
+14. MLZ -1 58 57;
+15. MLZ -1 89 88; preloadCallStack beginDoWhile0
+16. ADD A88 1 87;
+17. MLZ -1 A6 A87;
+18. MLZ -1 A88 2;
+19. MLZ -1 A2 6;
+20. MLZ -1 23 A6;
+21. MLZ -1 30 0;
+22. ADD A6 2 88; call25_random
+23. AND A4 7 3;
+24. ADD A3 -1 2;
+25. MLZ A2 16 0;
+26. MLZ 0 0 0; endDoWhile0
+27. MLZ -1 A3 1;
+28. MLZ -1 41 0;
+29. ADD A88 1 87; beginSub1_random
+30. SL A4 1 5;
+31. XOR A5 A4 4;
+32. SRL A4 5 5;
+33. XOR A5 A4 4;
+34. SL A4 2 5;
+35. XOR A5 A4 4;
+36. MLZ -1 A6 88;
+37. ADD A6 1 2;
+38. MLZ -1 B6 0;
+39. MLZ -1 B2 6; endSub1_random
+40. ADD A88 1 87;
+41. MLZ -1 A86 A87;
+42. MLZ -1 A88 2;
+43. MLZ -1 A2 86;
+44. MLZ -1 47 A86;
+45. MLZ -1 263 0;
+46. ADD A86 2 88; call24_clearboard
+47. ADD A88 1 87;
+48. MLZ -1 A28 A87;
+49. MLZ -1 A88 2;
+50. MLZ -1 A2 28;
+51. MLZ -1 54 A28;
+52. MLZ -1 127 0;
+53. ADD A28 2 88; call23_rotateclockwise
+54. ADD A88 1 87;
+55. MLZ -1 A84 A87;
+56. MLZ -1 A88 2;
+57. MLZ -1 A2 84;
+58. MLZ -1 61 A84;
+59. MLZ -1 216 0;
+60. ADD A84 2 88; call22_collisiontest
+61. MLZ -1 123 0; beginWhile2
+62. ADD A27 -1 2;
+63. ADD A88 1 87;
+64. MLZ -1 A32 A87;
+65. MLZ -1 A88 2;
+66. MLZ -1 A2 32;
+67. MLZ -1 70 A32;
+68. MLZ -1 177 0;
+69. ADD A32 2 88; call21_updatelive
+70. ADD A88 1 87;
+71. MLZ -1 A83 A87;
+72. MLZ -1 A88 2;
+73. MLZ -1 A2 83;
+74. MLZ -1 77 A83;
+75. MLZ -1 191 0;
+76. ADD A83 2 88; call20_genliveboard
+77. ADD A88 1 87;
+78. MLZ -1 A28 A87;
+79. MLZ -1 A88 2;
+80. MLZ -1 A2 28;
+81. MLZ -1 84 A28;
+82. MLZ -1 127 0;
+83. ADD A28 2 88; call19_rotateclockwise
+84. ADD A88 1 87;
+85. MLZ -1 A84 A87;
+86. MLZ -1 A88 2;
+87. MLZ -1 A2 84;
+88. MLZ -1 91 A84;
+89. MLZ -1 216 0;
+90. ADD A84 2 88; call18_collisiontest
+91. MNZ A27 107 0; beginIf3
+92. MLZ 0 0 0;
+93. ADD A88 1 87;
+94. MLZ -1 A32 A87;
+95. MLZ -1 A88 2;
+96. MLZ -1 A2 32;
+97. MLZ -1 100 A32;
+98. MLZ -1 177 0;
+99. ADD A32 2 88; call17_updatelive
+100. ADD A88 1 87;
+101. MLZ -1 A83 A87;
+102. MLZ -1 A88 2;
+103. MLZ -1 A2 83;
+104. MLZ -1 107 A83;
+105. MLZ -1 191 0;
+106. ADD A83 2 88; call16_genliveboard endIf3
+107. ADD A88 1 87;
+108. MLZ -1 A31 A87;
+109. MLZ -1 A88 2;
+110. MLZ -1 A2 31;
+111. MLZ -1 114 A31;
+112. MLZ -1 167 0;
+113. ADD A31 2 88; call15_movedown
+114. ADD A88 1 87;
+115. MLZ -1 A84 A87;
+116. MLZ -1 A88 2;
+117. MLZ -1 A2 84;
+118. MLZ -1 121 A84;
+119. MLZ -1 216 0;
+120. ADD A84 2 88; call14_collisiontest
+121. MLZ -1 A27 1;
+122. ADD A27 -1 2;
+123. MLZ A2 63 0; endWhile2
+124. MLZ 0 0 0;
+125. MLZ -1 146 0;
+126. MLZ -1 155 0; beginSub4_rotateclockwise
+127. SUB A13 A14 18;
+128. ADD A18 A9 18;
+129. SUB A9 A8 23;
+130. ADD A23 A14 23;
+131. MLZ -1 A9 19;
+132. MLZ -1 A14 24;
+133. SUB A15 A14 20;
+134. ADD A20 A9 20;
+135. SUB A9 A10 25;
+136. ADD A25 A14 25;
+137. SUB A16 A14 21;
+138. ADD A21 A9 21;
+139. SUB A9 A11 26;
+140. ADD A26 A14 26;
+141. MLZ -1 A28 88;
+142. ADD A28 1 2;
+143. MLZ -1 B28 0;
+144. MLZ -1 B2 28; endSub4_rotateclockwise
+145. MLZ -1 156 0;
+146. MLZ -1 165 0; beginSub5_moveright
+147. ADD A8 1 18;
+148. ADD A9 1 19;
+149. ADD A10 1 20;
+150. ADD A11 1 21;
+151. MLZ -1 A29 88;
+152. ADD A29 1 2;
+153. MLZ -1 B29 0;
+154. MLZ -1 B2 29; endSub5_moveright
+155. MLZ -1 166 0;
+156. MLZ -1 175 0; beginSub6_moveleft
+157. ADD A8 -1 18;
+158. ADD A9 -1 19;
+159. ADD A10 -1 20;
+160. ADD A11 -1 21;
+161. MLZ -1 A30 88;
+162. ADD A30 1 2;
+163. MLZ -1 B30 0;
+164. MLZ -1 B2 30; endSub6_moveleft
+165. MLZ -1 176 0;
+166. MLZ -1 189 0; beginSub7_movedown
+167. ADD A13 -1 23;
+168. ADD A14 -1 24;
+169. ADD A15 -1 25;
+170. ADD A16 -1 26;
+171. MLZ -1 A31 88;
+172. ADD A31 1 2;
+173. MLZ -1 B31 0;
+174. MLZ -1 B2 31; endSub7_movedown
+175. MLZ -1 190 0;
+176. MLZ -1 214 0; beginSub8_updatelive
+177. MLZ -1 A18 8;
+178. MLZ -1 A23 13;
+179. MLZ -1 A19 9;
+180. MLZ -1 A24 14;
+181. MLZ -1 A20 10;
+182. MLZ -1 A25 15;
+183. MLZ -1 A21 11;
+184. MLZ -1 A26 16;
+185. MLZ -1 A32 88;
+186. ADD A32 1 2;
+187. MLZ -1 B32 0;
+188. MLZ -1 B2 32; endSub8_updatelive
+189. MLZ -1 215 0;
+190. MLZ -1 232 0; beginSub9_genliveboard
+191. ADD A88 1 87;
+192. MLZ -1 A85 A87;
+193. MLZ -1 A88 2;
+194. MLZ -1 A2 85;
+195. MLZ -1 198 A85;
+196. MLZ -1 234 0;
+197. ADD A85 2 88; call13_clearpiece
+198. SL 1 A8 5;
+199. ADD A13 58 2;
+200. OR B2 A5 A2;
+201. SL 1 A9 5;
+202. ADD A14 58 2;
+203. OR B2 A5 A2;
+204. SL 1 A10 5;
+205. ADD A15 58 2;
+206. OR B2 A5 A2;
+207. SL 1 A11 5;
+208. ADD A16 58 2;
+209. OR B2 A5 A2;
+210. MLZ -1 A83 88;
+211. ADD A83 1 2;
+212. MLZ -1 B83 0;
+213. MLZ -1 B2 83; endSub9_genliveboard
+214. MLZ -1 233 0;
+215. MLZ -1 261 0; beginSub10_collisiontest
+216. ADD A23 34 2;
+217. SRL B2 A18 27;
+218. ADD A24 34 2;
+219. SRL B2 A19 5;
+220. OR A27 A5 27;
+221. ADD A25 34 2;
+222. SRL B2 A20 5;
+223. OR A27 A5 27;
+224. ADD A26 34 2;
+225. SRL B2 A21 5;
+226. OR A27 A5 27;
+227. AND A27 1 27;
+228. MLZ -1 A84 88;
+229. ADD A84 1 2;
+230. MLZ -1 B84 0;
+231. MLZ -1 B2 84; endSub10_collisiontest
+232. MLZ -1 262 0;
+233. MLZ -1 290 0; beginSub11_clearpiece
+234. MLZ -1 0 58;
+235. MLZ -1 0 59;
+236. MLZ -1 0 60;
+237. MLZ -1 0 61;
+238. MLZ -1 0 62;
+239. MLZ -1 0 63;
+240. MLZ -1 0 64;
+241. MLZ -1 0 65;
+242. MLZ -1 0 66;
+243. MLZ -1 0 67;
+244. MLZ -1 0 68;
+245. MLZ -1 0 69;
+246. MLZ -1 0 70;
+247. MLZ -1 0 71;
+248. MLZ -1 0 72;
+249. MLZ -1 0 73;
+250. MLZ -1 0 74;
+251. MLZ -1 0 75;
+252. MLZ -1 0 76;
+253. MLZ -1 0 77;
+254. MLZ -1 0 78;
+255. MLZ -1 0 79;
+256. MLZ -1 0 80;
+257. MLZ -1 A85 88;
+258. ADD A85 1 2;
+259. MLZ -1 B85 0;
+260. MLZ -1 B2 85; endSub11_clearpiece
+261. MLZ -1 290 0;
+262. MLZ 0 0 0; beginSub12_clearboard
+263. MLZ -1 65535 34;
+264. MLZ -1 65535 35;
+265. MLZ -1 57351 36;
+266. MLZ -1 57351 37;
+267. MLZ -1 57351 38;
+268. MLZ -1 57351 39;
+269. MLZ -1 57351 40;
+270. MLZ -1 57351 41;
+271. MLZ -1 57351 42;
+272. MLZ -1 57351 43;
+273. MLZ -1 57351 44;
+274. MLZ -1 57351 45;
+275. MLZ -1 57351 46;
+276. MLZ -1 57351 47;
+277. MLZ -1 57351 48;
+278. MLZ -1 57351 49;
+279. MLZ -1 57351 50;
+280. MLZ -1 57351 51;
+281. MLZ -1 57351 52;
+282. MLZ -1 57351 53;
+283. MLZ -1 57351 54;
+284. MLZ -1 57351 55;
+285. MLZ -1 57351 56;
+286. MLZ -1 A86 88;
+287. ADD A86 1 2;
+288. MLZ -1 B86 0;
+289. MLZ -1 B2 86; endSub12_clearboard
 
 RAM map:
 0: pc
 1: display
 2: scratch0
-3: fib
-4: scratch1
-5: scratch2
-6: scratch3
-7: call
+3: randval
+4: rand
+5: shifted
+6: random
+7: x
+8: x[0]
+9: x[1]
+10: x[2]
+11: x[3]
+12: y
+13: y[0]
+14: y[1]
+15: y[2]
+16: y[3]
+17: xt
+18: xt[0]
+19: xt[1]
+20: xt[2]
+21: xt[3]
+22: yt
+23: yt[0]
+24: yt[1]
+25: yt[2]
+26: yt[3]
+27: collision
+28: rotateclockwise
+29: moveright
+30: moveleft
+31: movedown
+32: updatelive
+33: deadboard
+34: deadboard[0]
+35: deadboard[1]
+36: deadboard[2]
+37: deadboard[3]
+38: deadboard[4]
+39: deadboard[5]
+40: deadboard[6]
+41: deadboard[7]
+42: deadboard[8]
+43: deadboard[9]
+44: deadboard[10]
+45: deadboard[11]
+46: deadboard[12]
+47: deadboard[13]
+48: deadboard[14]
+49: deadboard[15]
+50: deadboard[16]
+51: deadboard[17]
+52: deadboard[18]
+53: deadboard[19]
+54: deadboard[20]
+55: deadboard[21]
+56: deadboard[22]
+57: liveboard
+58: liveboard[0]
+59: liveboard[1]
+60: liveboard[2]
+61: liveboard[3]
+62: liveboard[4]
+63: liveboard[5]
+64: liveboard[6]
+65: liveboard[7]
+66: liveboard[8]
+67: liveboard[9]
+68: liveboard[10]
+69: liveboard[11]
+70: liveboard[12]
+71: liveboard[13]
+72: liveboard[14]
+73: liveboard[15]
+74: liveboard[16]
+75: liveboard[17]
+76: liveboard[18]
+77: liveboard[19]
+78: liveboard[20]
+79: liveboard[21]
+80: liveboard[22]
+81: row
+82: i
+83: genliveboard
+84: collisiontest
+85: clearpiece
+86: clearboard
+87: scratch1
+88: call
 
-fib map:
+moveleft map:
 0: return
 1: previous_call
-2: cur
-3: sum
+
+moveright map:
+0: return
+1: previous_call
+
+genliveboard map:
+0: return
+1: previous_call
+
+updatelive map:
+0: return
+1: previous_call
+
+clearpiece map:
+0: return
+1: previous_call
+
+random map:
+0: return
+1: previous_call
+
+rotateclockwise map:
+0: return
+1: previous_call
+
+clearboard map:
+0: return
+1: previous_call
+
+movedown map:
+0: return
+1: previous_call
+
+collisiontest map:
+0: return
+1: previous_call
