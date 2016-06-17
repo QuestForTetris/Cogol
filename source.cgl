@@ -21,29 +21,38 @@ sub random() {
   rand ^= shifted;
 }
 
-my x[4] = {5,6,6,7};
-my y[4] = {10,10,9,9};
+my x[4];
+my y[4];
 my xt[4];
 my yt[4];
 
 call clearBoard();
-
-call rotateClockwise();
+call dropZ();
 my collision;
-call collisionTest();
-while (collision < 1){
-  call updateLive();
-  call genLiveBoard();
-  call rotateClockwise();
-  call collisionTest();
-  if(collision == 0){
+do main {
+  while (collision < 1){
     call updateLive();
     call genLiveBoard();
+    #call rotateClockwise();
+    #call collisionTest();
+    #if(collision == 0){
+    #  call updateLive();
+    #  call genLiveBoard();
+    #}
+    call moveDown();
+    call collisionTest();
+    display = collision;
   }
-  call moveDown();
+  call killPiece();
+  call random();
+  randval = rand & 1;
+  if(randval == 0){
+    call dropZ();
+  } else {
+    call dropS();
+  }
   call collisionTest();
-  display = collision;
-}
+} while (collision < 1);
 
 sub rotateClockwise(){
   xt[0] = y[0] - y[1];
@@ -111,6 +120,18 @@ sub genLiveBoard(){
   liveboard[y[3]] |= shifted;
 }
 
+sub killPiece(){
+  call clearPiece();
+  shifted = 1 << x[0];
+  deadboard[y[0]] |= shifted;
+  shifted = 1 << x[1];
+  deadboard[y[1]] |= shifted;
+  shifted = 1 << x[2];
+  deadboard[y[2]] |= shifted;
+  shifted = 1 << x[3];
+  deadboard[y[3]] |= shifted;
+}
+
 sub collisionTest(){
   collision = deadboard[yt[0]] >>> xt[0];
   shifted = deadboard[yt[1]] >>> xt[1];
@@ -176,4 +197,26 @@ sub clearBoard(){
   deadboard[20] = 57351;
   deadboard[21] = 57351;
   deadboard[22] = 57351;
+}
+
+sub dropZ(){
+  xt[0] = 6;
+  xt[1] = 7;
+  xt[2] = 7;
+  xt[3] = 8;
+  yt[0] = 20;
+  yt[1] = 20;
+  yt[2] = 19;
+  yt[3] = 19;
+}
+
+sub dropS(){
+  xt[0] = 6;
+  xt[1] = 7;
+  xt[2] = 7;
+  xt[3] = 8;
+  yt[0] = 19;
+  yt[1] = 20;
+  yt[2] = 19;
+  yt[3] = 20;
 }
