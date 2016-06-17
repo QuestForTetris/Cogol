@@ -1,607 +1,341 @@
-
-Source Cogol:
-
-# output random values from 1 to 7, inclusive
-my randval;
-my rand = 1;
-#do {
-  do {
-    call random();
-    randval = rand & 7;
-  } while(randval < 1);
-  display = randval;
-#} while (1);
-
-
-my shifted;
-sub random() {
-  shifted = rand << 1;
-  rand ^= shifted;
-  shifted = rand >>> 5;
-  rand ^= shifted;
-  shifted = rand << 2;
-  rand ^= shifted;
-}
-
-my x[4] = {5,6,6,7};
-my y[4] = {10,10,9,9};
-my xt[4];
-my yt[4];
-
-call clearBoard();
-
-call rotateClockwise();
-my collision;
-call collisionTest();
-while (collision < 1){
-  call updateLive();
-  call genLiveBoard();
-  call rotateClockwise();
-  call collisionTest();
-  if(collision == 0){
-    call updateLive();
-    call genLiveBoard();
-  }
-  call moveDown();
-  call collisionTest();
-  display = collision;
-}
-
-sub rotateClockwise(){
-  xt[0] = y[0] - y[1];
-  xt[0] += x[1];
-  yt[0] = x[1] - x[0];
-  yt[0] += y[1];
-  xt[1] = x[1];
-  yt[1] = y[1];
-  xt[2] = y[2] - y[1];
-  xt[2] += x[1];
-  yt[2] = x[1] - x[2];
-  yt[2] += y[1];
-  xt[3] = y[3] - y[1];
-  xt[3] += x[1];
-  yt[3] = x[1] - x[3];
-  yt[3] += y[1];
-}
-
-sub moveRight(){
-  xt[0] = x[0] + 1;
-  xt[1] = x[1] + 1;
-  xt[2] = x[2] + 1;
-  xt[3] = x[3] + 1;
-}
-
-sub moveLeft(){
-  xt[0] = x[0] - 1;
-  xt[1] = x[1] - 1;
-  xt[2] = x[2] - 1;
-  xt[3] = x[3] - 1;
-}
-
-sub moveDown(){
-  yt[0] = y[0] - 1;
-  yt[1] = y[1] - 1;
-  yt[2] = y[2] - 1;
-  yt[3] = y[3] - 1;
-}
-
-sub updateLive(){
-  x[0] = xt[0];
-  y[0] = yt[0];
-  x[1] = xt[1];
-  y[1] = yt[1];
-  x[2] = xt[2];
-  y[2] = yt[2];
-  x[3] = xt[3];
-  y[3] = yt[3];
-}
-
-my deadboard[23];
-my liveboard[23];
-my row;
-my i;
-
-sub genLiveBoard(){
-  call clearPiece();
-  shifted = 1 << x[0];
-  liveboard[y[0]] |= shifted;
-  shifted = 1 << x[1];
-  liveboard[y[1]] |= shifted;
-  shifted = 1 << x[2];
-  liveboard[y[2]] |= shifted;
-  shifted = 1 << x[3];
-  liveboard[y[3]] |= shifted;
-}
-
-sub collisionTest(){
-  collision = deadboard[yt[0]] >>> xt[0];
-  shifted = deadboard[yt[1]] >>> xt[1];
-  collision |= shifted;
-  shifted = deadboard[yt[2]] >>> xt[2];
-  collision |= shifted;
-  shifted = deadboard[yt[3]] >>> xt[3];
-  collision |= shifted;
-  collision &= 1;
-}
-
-sub clearPiece(){
-  # loop unrolling because loops are slow
-  # since these are all static addresses
-  # they are optimized by the compiler
-  # to be one instruction per line
-  liveboard[0] = 0;
-  liveboard[1] = 0;
-  liveboard[2] = 0;
-  liveboard[3] = 0;
-  liveboard[4] = 0;
-  liveboard[5] = 0;
-  liveboard[6] = 0;
-  liveboard[7] = 0;
-  liveboard[8] = 0;
-  liveboard[9] = 0;
-  liveboard[10] = 0;
-  liveboard[11] = 0;
-  liveboard[12] = 0;
-  liveboard[13] = 0;
-  liveboard[14] = 0;
-  liveboard[15] = 0;
-  liveboard[16] = 0;
-  liveboard[17] = 0;
-  liveboard[18] = 0;
-  liveboard[19] = 0;
-  liveboard[20] = 0;
-  liveboard[21] = 0;
-  liveboard[22] = 0;
-}
-
-sub clearBoard(){
-  deadboard[0] = 65535;
-  deadboard[1] = 65535;
-  deadboard[2] = 57351;
-  deadboard[3] = 57351;
-  deadboard[4] = 57351;
-  deadboard[5] = 57351;
-  deadboard[6] = 57351;
-  deadboard[7] = 57351;
-  deadboard[8] = 57351;
-  deadboard[9] = 57351;
-  deadboard[10] = 57351;
-  deadboard[11] = 57351;
-  deadboard[12] = 57351;
-  deadboard[13] = 57351;
-  deadboard[14] = 57351;
-  deadboard[15] = 57351;
-  deadboard[16] = 57351;
-  deadboard[17] = 57351;
-  deadboard[18] = 57351;
-  deadboard[19] = 57351;
-  deadboard[20] = 57351;
-  deadboard[21] = 57351;
-  deadboard[22] = 57351;
-}
-
-Tokens:
-[my, randval, ;, my, rand, =, 1, ;, do, {, call, random, (, ), ;, randval, =, rand, &, 7, ;, }, while, (, randval, <, 1, ), ;, display, =, randval, ;, my, shifted, ;, sub, random, (, ), {, shifted, =, rand, <<, 1, ;, rand, ^=, shifted, ;, shifted, =, rand, >>>, 5, ;, rand, ^=, shifted, ;, shifted, =, rand, <<, 2, ;, rand, ^=, shifted, ;, }, my, x, [, 4, ], =, {, 5, ,, 6, ,, 6, ,, 7, }, ;, my, y, [, 4, ], =, {, 10, ,, 10, ,, 9, ,, 9, }, ;, my, xt, [, 4, ], ;, my, yt, [, 4, ], ;, call, clearboard, (, ), ;, call, rotateclockwise, (, ), ;, my, collision, ;, call, collisiontest, (, ), ;, while, (, collision, <, 1, ), {, call, updatelive, (, ), ;, call, genliveboard, (, ), ;, call, rotateclockwise, (, ), ;, call, collisiontest, (, ), ;, if, (, collision, ==, 0, ), {, call, updatelive, (, ), ;, call, genliveboard, (, ), ;, }, call, movedown, (, ), ;, call, collisiontest, (, ), ;, display, =, collision, ;, }, sub, rotateclockwise, (, ), {, xt, [, 0, ], =, y, [, 0, ], -, y, [, 1, ], ;, xt, [, 0, ], +=, x, [, 1, ], ;, yt, [, 0, ], =, x, [, 1, ], -, x, [, 0, ], ;, yt, [, 0, ], +=, y, [, 1, ], ;, xt, [, 1, ], =, x, [, 1, ], ;, yt, [, 1, ], =, y, [, 1, ], ;, xt, [, 2, ], =, y, [, 2, ], -, y, [, 1, ], ;, xt, [, 2, ], +=, x, [, 1, ], ;, yt, [, 2, ], =, x, [, 1, ], -, x, [, 2, ], ;, yt, [, 2, ], +=, y, [, 1, ], ;, xt, [, 3, ], =, y, [, 3, ], -, y, [, 1, ], ;, xt, [, 3, ], +=, x, [, 1, ], ;, yt, [, 3, ], =, x, [, 1, ], -, x, [, 3, ], ;, yt, [, 3, ], +=, y, [, 1, ], ;, }, sub, moveright, (, ), {, xt, [, 0, ], =, x, [, 0, ], +, 1, ;, xt, [, 1, ], =, x, [, 1, ], +, 1, ;, xt, [, 2, ], =, x, [, 2, ], +, 1, ;, xt, [, 3, ], =, x, [, 3, ], +, 1, ;, }, sub, moveleft, (, ), {, xt, [, 0, ], =, x, [, 0, ], -, 1, ;, xt, [, 1, ], =, x, [, 1, ], -, 1, ;, xt, [, 2, ], =, x, [, 2, ], -, 1, ;, xt, [, 3, ], =, x, [, 3, ], -, 1, ;, }, sub, movedown, (, ), {, yt, [, 0, ], =, y, [, 0, ], -, 1, ;, yt, [, 1, ], =, y, [, 1, ], -, 1, ;, yt, [, 2, ], =, y, [, 2, ], -, 1, ;, yt, [, 3, ], =, y, [, 3, ], -, 1, ;, }, sub, updatelive, (, ), {, x, [, 0, ], =, xt, [, 0, ], ;, y, [, 0, ], =, yt, [, 0, ], ;, x, [, 1, ], =, xt, [, 1, ], ;, y, [, 1, ], =, yt, [, 1, ], ;, x, [, 2, ], =, xt, [, 2, ], ;, y, [, 2, ], =, yt, [, 2, ], ;, x, [, 3, ], =, xt, [, 3, ], ;, y, [, 3, ], =, yt, [, 3, ], ;, }, my, deadboard, [, 23, ], ;, my, liveboard, [, 23, ], ;, my, row, ;, my, i, ;, sub, genliveboard, (, ), {, call, clearpiece, (, ), ;, shifted, =, 1, <<, x, [, 0, ], ;, liveboard, [, y, [, 0, ], ], |=, shifted, ;, shifted, =, 1, <<, x, [, 1, ], ;, liveboard, [, y, [, 1, ], ], |=, shifted, ;, shifted, =, 1, <<, x, [, 2, ], ;, liveboard, [, y, [, 2, ], ], |=, shifted, ;, shifted, =, 1, <<, x, [, 3, ], ;, liveboard, [, y, [, 3, ], ], |=, shifted, ;, }, sub, collisiontest, (, ), {, collision, =, deadboard, [, yt, [, 0, ], ], >>>, xt, [, 0, ], ;, shifted, =, deadboard, [, yt, [, 1, ], ], >>>, xt, [, 1, ], ;, collision, |=, shifted, ;, shifted, =, deadboard, [, yt, [, 2, ], ], >>>, xt, [, 2, ], ;, collision, |=, shifted, ;, shifted, =, deadboard, [, yt, [, 3, ], ], >>>, xt, [, 3, ], ;, collision, |=, shifted, ;, collision, &=, 1, ;, }, sub, clearpiece, (, ), {, liveboard, [, 0, ], =, 0, ;, liveboard, [, 1, ], =, 0, ;, liveboard, [, 2, ], =, 0, ;, liveboard, [, 3, ], =, 0, ;, liveboard, [, 4, ], =, 0, ;, liveboard, [, 5, ], =, 0, ;, liveboard, [, 6, ], =, 0, ;, liveboard, [, 7, ], =, 0, ;, liveboard, [, 8, ], =, 0, ;, liveboard, [, 9, ], =, 0, ;, liveboard, [, 10, ], =, 0, ;, liveboard, [, 11, ], =, 0, ;, liveboard, [, 12, ], =, 0, ;, liveboard, [, 13, ], =, 0, ;, liveboard, [, 14, ], =, 0, ;, liveboard, [, 15, ], =, 0, ;, liveboard, [, 16, ], =, 0, ;, liveboard, [, 17, ], =, 0, ;, liveboard, [, 18, ], =, 0, ;, liveboard, [, 19, ], =, 0, ;, liveboard, [, 20, ], =, 0, ;, liveboard, [, 21, ], =, 0, ;, liveboard, [, 22, ], =, 0, ;, }, sub, clearboard, (, ), {, deadboard, [, 0, ], =, 65535, ;, deadboard, [, 1, ], =, 65535, ;, deadboard, [, 2, ], =, 57351, ;, deadboard, [, 3, ], =, 57351, ;, deadboard, [, 4, ], =, 57351, ;, deadboard, [, 5, ], =, 57351, ;, deadboard, [, 6, ], =, 57351, ;, deadboard, [, 7, ], =, 57351, ;, deadboard, [, 8, ], =, 57351, ;, deadboard, [, 9, ], =, 57351, ;, deadboard, [, 10, ], =, 57351, ;, deadboard, [, 11, ], =, 57351, ;, deadboard, [, 12, ], =, 57351, ;, deadboard, [, 13, ], =, 57351, ;, deadboard, [, 14, ], =, 57351, ;, deadboard, [, 15, ], =, 57351, ;, deadboard, [, 16, ], =, 57351, ;, deadboard, [, 17, ], =, 57351, ;, deadboard, [, 18, ], =, 57351, ;, deadboard, [, 19, ], =, 57351, ;, deadboard, [, 20, ], =, 57351, ;, deadboard, [, 21, ], =, 57351, ;, deadboard, [, 22, ], =, 57351, ;, }]
-
-Compiled QFTASM:
 0. MLZ -1 1 4;
-1. MLZ -1 5 8;
-2. MLZ -1 6 9;
-3. MLZ -1 6 10;
-4. MLZ -1 7 11;
-5. MLZ -1 8 7;
-6. MLZ -1 10 13;
-7. MLZ -1 10 14;
-8. MLZ -1 9 15;
-9. MLZ -1 9 16;
-10. MLZ -1 13 12;
-11. MLZ -1 18 17;
-12. MLZ -1 23 22;
-13. MLZ -1 34 33;
-14. MLZ -1 58 57;
-15. MLZ -1 89 88; preloadCallStack beginDoWhile0
-16. ADD A88 1 87;
-17. MLZ -1 A6 A87;
-18. MLZ -1 A88 2;
-19. MLZ -1 A2 6;
-20. MLZ -1 23 A6;
-21. MLZ -1 30 0;
-22. ADD A6 2 88; call25_random
-23. AND A4 7 3;
-24. ADD A3 -1 2;
-25. MLZ A2 16 0;
-26. MLZ 0 0 0; endDoWhile0
-27. MLZ -1 A3 1;
-28. MLZ -1 41 0;
-29. ADD A88 1 87; beginSub1_random
-30. SL A4 1 5;
-31. XOR A5 A4 4;
-32. SRL A4 5 5;
-33. XOR A5 A4 4;
-34. SL A4 2 5;
-35. XOR A5 A4 4;
-36. MLZ -1 A6 88;
-37. ADD A6 1 2;
-38. MLZ -1 B6 0;
-39. MLZ -1 B2 6; endSub1_random
-40. ADD A88 1 87;
-41. MLZ -1 A86 A87;
-42. MLZ -1 A88 2;
-43. MLZ -1 A2 86;
-44. MLZ -1 47 A86;
-45. MLZ -1 263 0;
-46. ADD A86 2 88; call24_clearboard
-47. ADD A88 1 87;
-48. MLZ -1 A28 A87;
-49. MLZ -1 A88 2;
-50. MLZ -1 A2 28;
-51. MLZ -1 54 A28;
-52. MLZ -1 127 0;
-53. ADD A28 2 88; call23_rotateclockwise
-54. ADD A88 1 87;
-55. MLZ -1 A84 A87;
-56. MLZ -1 A88 2;
-57. MLZ -1 A2 84;
-58. MLZ -1 61 A84;
-59. MLZ -1 216 0;
-60. ADD A84 2 88; call22_collisiontest
-61. MLZ -1 123 0; beginWhile2
-62. ADD A27 -1 2;
-63. ADD A88 1 87;
-64. MLZ -1 A32 A87;
-65. MLZ -1 A88 2;
-66. MLZ -1 A2 32;
-67. MLZ -1 70 A32;
-68. MLZ -1 177 0;
-69. ADD A32 2 88; call21_updatelive
-70. ADD A88 1 87;
-71. MLZ -1 A83 A87;
-72. MLZ -1 A88 2;
-73. MLZ -1 A2 83;
-74. MLZ -1 77 A83;
-75. MLZ -1 191 0;
-76. ADD A83 2 88; call20_genliveboard
-77. ADD A88 1 87;
-78. MLZ -1 A28 A87;
-79. MLZ -1 A88 2;
-80. MLZ -1 A2 28;
-81. MLZ -1 84 A28;
-82. MLZ -1 127 0;
-83. ADD A28 2 88; call19_rotateclockwise
-84. ADD A88 1 87;
-85. MLZ -1 A84 A87;
-86. MLZ -1 A88 2;
-87. MLZ -1 A2 84;
-88. MLZ -1 91 A84;
-89. MLZ -1 216 0;
-90. ADD A84 2 88; call18_collisiontest
-91. MNZ A27 107 0; beginIf3
-92. MLZ 0 0 0;
-93. ADD A88 1 87;
-94. MLZ -1 A32 A87;
-95. MLZ -1 A88 2;
-96. MLZ -1 A2 32;
-97. MLZ -1 100 A32;
-98. MLZ -1 177 0;
-99. ADD A32 2 88; call17_updatelive
-100. ADD A88 1 87;
-101. MLZ -1 A83 A87;
-102. MLZ -1 A88 2;
-103. MLZ -1 A2 83;
-104. MLZ -1 107 A83;
-105. MLZ -1 191 0;
-106. ADD A83 2 88; call16_genliveboard endIf3
-107. ADD A88 1 87;
-108. MLZ -1 A31 A87;
-109. MLZ -1 A88 2;
-110. MLZ -1 A2 31;
-111. MLZ -1 114 A31;
-112. MLZ -1 167 0;
-113. ADD A31 2 88; call15_movedown
-114. ADD A88 1 87;
-115. MLZ -1 A84 A87;
-116. MLZ -1 A88 2;
-117. MLZ -1 A2 84;
-118. MLZ -1 121 A84;
-119. MLZ -1 216 0;
-120. ADD A84 2 88; call14_collisiontest
-121. MLZ -1 A27 1;
-122. ADD A27 -1 2;
-123. MLZ A2 63 0; endWhile2
-124. MLZ 0 0 0;
-125. MLZ -1 146 0;
-126. MLZ -1 155 0; beginSub4_rotateclockwise
-127. SUB A13 A14 18;
-128. ADD A18 A9 18;
-129. SUB A9 A8 23;
-130. ADD A23 A14 23;
-131. MLZ -1 A9 19;
-132. MLZ -1 A14 24;
-133. SUB A15 A14 20;
-134. ADD A20 A9 20;
-135. SUB A9 A10 25;
-136. ADD A25 A14 25;
-137. SUB A16 A14 21;
-138. ADD A21 A9 21;
-139. SUB A9 A11 26;
-140. ADD A26 A14 26;
-141. MLZ -1 A28 88;
-142. ADD A28 1 2;
-143. MLZ -1 B28 0;
-144. MLZ -1 B2 28; endSub4_rotateclockwise
-145. MLZ -1 156 0;
-146. MLZ -1 165 0; beginSub5_moveright
-147. ADD A8 1 18;
-148. ADD A9 1 19;
-149. ADD A10 1 20;
-150. ADD A11 1 21;
-151. MLZ -1 A29 88;
-152. ADD A29 1 2;
-153. MLZ -1 B29 0;
-154. MLZ -1 B2 29; endSub5_moveright
-155. MLZ -1 166 0;
-156. MLZ -1 175 0; beginSub6_moveleft
-157. ADD A8 -1 18;
-158. ADD A9 -1 19;
-159. ADD A10 -1 20;
-160. ADD A11 -1 21;
-161. MLZ -1 A30 88;
-162. ADD A30 1 2;
-163. MLZ -1 B30 0;
-164. MLZ -1 B2 30; endSub6_moveleft
-165. MLZ -1 176 0;
-166. MLZ -1 189 0; beginSub7_movedown
-167. ADD A13 -1 23;
-168. ADD A14 -1 24;
-169. ADD A15 -1 25;
-170. ADD A16 -1 26;
-171. MLZ -1 A31 88;
-172. ADD A31 1 2;
-173. MLZ -1 B31 0;
-174. MLZ -1 B2 31; endSub7_movedown
-175. MLZ -1 190 0;
-176. MLZ -1 214 0; beginSub8_updatelive
-177. MLZ -1 A18 8;
-178. MLZ -1 A23 13;
-179. MLZ -1 A19 9;
-180. MLZ -1 A24 14;
-181. MLZ -1 A20 10;
-182. MLZ -1 A25 15;
-183. MLZ -1 A21 11;
-184. MLZ -1 A26 16;
-185. MLZ -1 A32 88;
-186. ADD A32 1 2;
-187. MLZ -1 B32 0;
-188. MLZ -1 B2 32; endSub8_updatelive
-189. MLZ -1 215 0;
-190. MLZ -1 232 0; beginSub9_genliveboard
-191. ADD A88 1 87;
-192. MLZ -1 A85 A87;
-193. MLZ -1 A88 2;
-194. MLZ -1 A2 85;
-195. MLZ -1 198 A85;
-196. MLZ -1 234 0;
-197. ADD A85 2 88; call13_clearpiece
-198. SL 1 A8 5;
-199. ADD A13 58 2;
-200. OR B2 A5 A2;
-201. SL 1 A9 5;
-202. ADD A14 58 2;
-203. OR B2 A5 A2;
-204. SL 1 A10 5;
-205. ADD A15 58 2;
-206. OR B2 A5 A2;
-207. SL 1 A11 5;
-208. ADD A16 58 2;
-209. OR B2 A5 A2;
-210. MLZ -1 A83 88;
-211. ADD A83 1 2;
-212. MLZ -1 B83 0;
-213. MLZ -1 B2 83; endSub9_genliveboard
-214. MLZ -1 233 0;
-215. MLZ -1 261 0; beginSub10_collisiontest
-216. ADD A23 34 2;
-217. SRL B2 A18 27;
-218. ADD A24 34 2;
-219. SRL B2 A19 5;
-220. OR A27 A5 27;
-221. ADD A25 34 2;
-222. SRL B2 A20 5;
-223. OR A27 A5 27;
-224. ADD A26 34 2;
-225. SRL B2 A21 5;
-226. OR A27 A5 27;
-227. AND A27 1 27;
-228. MLZ -1 A84 88;
-229. ADD A84 1 2;
-230. MLZ -1 B84 0;
-231. MLZ -1 B2 84; endSub10_collisiontest
-232. MLZ -1 262 0;
-233. MLZ -1 290 0; beginSub11_clearpiece
-234. MLZ -1 0 58;
-235. MLZ -1 0 59;
-236. MLZ -1 0 60;
-237. MLZ -1 0 61;
-238. MLZ -1 0 62;
-239. MLZ -1 0 63;
-240. MLZ -1 0 64;
-241. MLZ -1 0 65;
-242. MLZ -1 0 66;
-243. MLZ -1 0 67;
-244. MLZ -1 0 68;
-245. MLZ -1 0 69;
-246. MLZ -1 0 70;
-247. MLZ -1 0 71;
-248. MLZ -1 0 72;
-249. MLZ -1 0 73;
-250. MLZ -1 0 74;
-251. MLZ -1 0 75;
-252. MLZ -1 0 76;
-253. MLZ -1 0 77;
-254. MLZ -1 0 78;
-255. MLZ -1 0 79;
-256. MLZ -1 0 80;
-257. MLZ -1 A85 88;
-258. ADD A85 1 2;
-259. MLZ -1 B85 0;
-260. MLZ -1 B2 85; endSub11_clearpiece
-261. MLZ -1 290 0;
-262. MLZ 0 0 0; beginSub12_clearboard
-263. MLZ -1 65535 34;
-264. MLZ -1 65535 35;
-265. MLZ -1 57351 36;
-266. MLZ -1 57351 37;
-267. MLZ -1 57351 38;
-268. MLZ -1 57351 39;
-269. MLZ -1 57351 40;
-270. MLZ -1 57351 41;
-271. MLZ -1 57351 42;
-272. MLZ -1 57351 43;
-273. MLZ -1 57351 44;
-274. MLZ -1 57351 45;
-275. MLZ -1 57351 46;
-276. MLZ -1 57351 47;
-277. MLZ -1 57351 48;
-278. MLZ -1 57351 49;
-279. MLZ -1 57351 50;
-280. MLZ -1 57351 51;
-281. MLZ -1 57351 52;
-282. MLZ -1 57351 53;
-283. MLZ -1 57351 54;
-284. MLZ -1 57351 55;
-285. MLZ -1 57351 56;
-286. MLZ -1 A86 88;
-287. ADD A86 1 2;
-288. MLZ -1 B86 0;
-289. MLZ -1 B2 86; endSub12_clearboard
-
-RAM map:
-0: pc
-1: display
-2: scratch0
-3: randval
-4: rand
-5: shifted
-6: random
-7: x
-8: x[0]
-9: x[1]
-10: x[2]
-11: x[3]
-12: y
-13: y[0]
-14: y[1]
-15: y[2]
-16: y[3]
-17: xt
-18: xt[0]
-19: xt[1]
-20: xt[2]
-21: xt[3]
-22: yt
-23: yt[0]
-24: yt[1]
-25: yt[2]
-26: yt[3]
-27: collision
-28: rotateclockwise
-29: moveright
-30: moveleft
-31: movedown
-32: updatelive
-33: deadboard
-34: deadboard[0]
-35: deadboard[1]
-36: deadboard[2]
-37: deadboard[3]
-38: deadboard[4]
-39: deadboard[5]
-40: deadboard[6]
-41: deadboard[7]
-42: deadboard[8]
-43: deadboard[9]
-44: deadboard[10]
-45: deadboard[11]
-46: deadboard[12]
-47: deadboard[13]
-48: deadboard[14]
-49: deadboard[15]
-50: deadboard[16]
-51: deadboard[17]
-52: deadboard[18]
-53: deadboard[19]
-54: deadboard[20]
-55: deadboard[21]
-56: deadboard[22]
-57: liveboard
-58: liveboard[0]
-59: liveboard[1]
-60: liveboard[2]
-61: liveboard[3]
-62: liveboard[4]
-63: liveboard[5]
-64: liveboard[6]
-65: liveboard[7]
-66: liveboard[8]
-67: liveboard[9]
-68: liveboard[10]
-69: liveboard[11]
-70: liveboard[12]
-71: liveboard[13]
-72: liveboard[14]
-73: liveboard[15]
-74: liveboard[16]
-75: liveboard[17]
-76: liveboard[18]
-77: liveboard[19]
-78: liveboard[20]
-79: liveboard[21]
-80: liveboard[22]
-81: row
-82: i
-83: genliveboard
-84: collisiontest
-85: clearpiece
-86: clearboard
-87: scratch1
-88: call
-
-moveleft map:
-0: return
-1: previous_call
-
-moveright map:
-0: return
-1: previous_call
-
-genliveboard map:
-0: return
-1: previous_call
-
-updatelive map:
-0: return
-1: previous_call
-
-clearpiece map:
-0: return
-1: previous_call
-
-random map:
-0: return
-1: previous_call
-
-rotateclockwise map:
-0: return
-1: previous_call
-
-clearboard map:
-0: return
-1: previous_call
-
-movedown map:
-0: return
-1: previous_call
-
-collisiontest map:
-0: return
-1: previous_call
+1. MLZ -1 8 7;
+2. MLZ -1 13 12;
+3. MLZ -1 18 17;
+4. MLZ -1 23 22;
+5. MLZ -1 34 33;
+6. MLZ -1 58 57;
+7. MLZ -1 92 91; preloadCallStack beginDoWhile0
+8. ADD A91 1 90;
+9. MLZ -1 A6 A90;
+10. MLZ -1 A91 2;
+11. MLZ -1 A2 6;
+12. MLZ -1 15 A6;
+13. MLZ -1 22 0;
+14. ADD A6 2 91; call31_random
+15. AND A4 7 3;
+16. ADD A3 -1 2;
+17. MLZ A2 8 0;
+18. MLZ 0 0 0; endDoWhile0
+19. MLZ -1 A3 1;
+20. MLZ -1 33 0;
+21. ADD A91 1 90; beginSub1_random
+22. SL A4 1 5;
+23. XOR A5 A4 4;
+24. SRL A4 5 5;
+25. XOR A5 A4 4;
+26. SL A4 2 5;
+27. XOR A5 A4 4;
+28. MLZ -1 A6 91;
+29. ADD A6 1 2;
+30. MLZ -1 B6 0;
+31. MLZ -1 B2 6; endSub1_random
+32. ADD A91 1 90;
+33. MLZ -1 A87 A90;
+34. MLZ -1 A91 2;
+35. MLZ -1 A2 87;
+36. MLZ -1 39 A87;
+37. MLZ -1 286 0;
+38. ADD A87 2 91; call30_clearboard
+39. ADD A91 1 90;
+40. MLZ -1 A88 A90;
+41. MLZ -1 A91 2;
+42. MLZ -1 A2 88;
+43. MLZ -1 46 A88;
+44. MLZ -1 315 0;
+45. ADD A88 2 91; call29_dropz beginDoWhile2_main
+46. MLZ -1 78 0; beginWhile3
+47. ADD A27 -1 2;
+48. ADD A91 1 90;
+49. MLZ -1 A32 A90;
+50. MLZ -1 A91 2;
+51. MLZ -1 A2 32;
+52. MLZ -1 55 A32;
+53. MLZ -1 175 0;
+54. ADD A32 2 91; call28_updatelive
+55. ADD A91 1 90;
+56. MLZ -1 A83 A90;
+57. MLZ -1 A91 2;
+58. MLZ -1 A2 83;
+59. MLZ -1 62 A83;
+60. MLZ -1 189 0;
+61. ADD A83 2 91; call27_genliveboard
+62. ADD A91 1 90;
+63. MLZ -1 A31 A90;
+64. MLZ -1 A91 2;
+65. MLZ -1 A2 31;
+66. MLZ -1 69 A31;
+67. MLZ -1 165 0;
+68. ADD A31 2 91; call26_movedown
+69. ADD A91 1 90;
+70. MLZ -1 A85 A90;
+71. MLZ -1 A91 2;
+72. MLZ -1 A2 85;
+73. MLZ -1 76 A85;
+74. MLZ -1 239 0;
+75. ADD A85 2 91; call25_collisiontest
+76. MLZ -1 A27 1;
+77. ADD A27 -1 2;
+78. MLZ A2 48 0; endWhile3
+79. MLZ 0 0 0;
+80. ADD A91 1 90;
+81. MLZ -1 A84 A90;
+82. MLZ -1 A91 2;
+83. MLZ -1 A2 84;
+84. MLZ -1 87 A84;
+85. MLZ -1 214 0;
+86. ADD A84 2 91; call24_killpiece
+87. ADD A91 1 90;
+88. MLZ -1 A6 A90;
+89. MLZ -1 A91 2;
+90. MLZ -1 A2 6;
+91. MLZ -1 94 A6;
+92. MLZ -1 22 0;
+93. ADD A6 2 91; call23_random
+94. AND A4 1 3;
+95. MNZ A3 106 0; beginIf4
+96. MLZ 0 0 0;
+97. ADD A91 1 90;
+98. MLZ -1 A88 A90;
+99. MLZ -1 A91 2;
+100. MLZ -1 A2 88;
+101. MLZ -1 104 A88;
+102. MLZ -1 315 0;
+103. ADD A88 2 91; call22_dropz
+104. MLZ -1 114 0; beginElse5
+105. ADD A91 1 90; endIf4
+106. ADD A91 1 90;
+107. MLZ -1 A89 A90;
+108. MLZ -1 A91 2;
+109. MLZ -1 A2 89;
+110. MLZ -1 113 A89;
+111. MLZ -1 329 0;
+112. ADD A89 2 91; call21_drops endElse5
+113. ADD A91 1 90;
+114. MLZ -1 A85 A90;
+115. MLZ -1 A91 2;
+116. MLZ -1 A2 85;
+117. MLZ -1 120 A85;
+118. MLZ -1 239 0;
+119. ADD A85 2 91; call20_collisiontest
+120. ADD A27 -1 2;
+121. MLZ A2 46 0;
+122. MLZ 0 0 0; endDoWhile2_main
+123. MLZ -1 144 0;
+124. MLZ -1 153 0; beginSub6_rotateclockwise
+125. SUB A13 A14 18;
+126. ADD A18 A9 18;
+127. SUB A9 A8 23;
+128. ADD A23 A14 23;
+129. MLZ -1 A9 19;
+130. MLZ -1 A14 24;
+131. SUB A15 A14 20;
+132. ADD A20 A9 20;
+133. SUB A9 A10 25;
+134. ADD A25 A14 25;
+135. SUB A16 A14 21;
+136. ADD A21 A9 21;
+137. SUB A9 A11 26;
+138. ADD A26 A14 26;
+139. MLZ -1 A28 91;
+140. ADD A28 1 2;
+141. MLZ -1 B28 0;
+142. MLZ -1 B2 28; endSub6_rotateclockwise
+143. MLZ -1 154 0;
+144. MLZ -1 163 0; beginSub7_moveright
+145. ADD A8 1 18;
+146. ADD A9 1 19;
+147. ADD A10 1 20;
+148. ADD A11 1 21;
+149. MLZ -1 A29 91;
+150. ADD A29 1 2;
+151. MLZ -1 B29 0;
+152. MLZ -1 B2 29; endSub7_moveright
+153. MLZ -1 164 0;
+154. MLZ -1 173 0; beginSub8_moveleft
+155. ADD A8 -1 18;
+156. ADD A9 -1 19;
+157. ADD A10 -1 20;
+158. ADD A11 -1 21;
+159. MLZ -1 A30 91;
+160. ADD A30 1 2;
+161. MLZ -1 B30 0;
+162. MLZ -1 B2 30; endSub8_moveleft
+163. MLZ -1 174 0;
+164. MLZ -1 187 0; beginSub9_movedown
+165. ADD A13 -1 23;
+166. ADD A14 -1 24;
+167. ADD A15 -1 25;
+168. ADD A16 -1 26;
+169. MLZ -1 A31 91;
+170. ADD A31 1 2;
+171. MLZ -1 B31 0;
+172. MLZ -1 B2 31; endSub9_movedown
+173. MLZ -1 188 0;
+174. MLZ -1 212 0; beginSub10_updatelive
+175. MLZ -1 A18 8;
+176. MLZ -1 A23 13;
+177. MLZ -1 A19 9;
+178. MLZ -1 A24 14;
+179. MLZ -1 A20 10;
+180. MLZ -1 A25 15;
+181. MLZ -1 A21 11;
+182. MLZ -1 A26 16;
+183. MLZ -1 A32 91;
+184. ADD A32 1 2;
+185. MLZ -1 B32 0;
+186. MLZ -1 B2 32; endSub10_updatelive
+187. MLZ -1 213 0;
+188. MLZ -1 237 0; beginSub11_genliveboard
+189. ADD A91 1 90;
+190. MLZ -1 A86 A90;
+191. MLZ -1 A91 2;
+192. MLZ -1 A2 86;
+193. MLZ -1 196 A86;
+194. MLZ -1 257 0;
+195. ADD A86 2 91; call19_clearpiece
+196. SL 1 A8 5;
+197. ADD A13 58 2;
+198. OR B2 A5 A2;
+199. SL 1 A9 5;
+200. ADD A14 58 2;
+201. OR B2 A5 A2;
+202. SL 1 A10 5;
+203. ADD A15 58 2;
+204. OR B2 A5 A2;
+205. SL 1 A11 5;
+206. ADD A16 58 2;
+207. OR B2 A5 A2;
+208. MLZ -1 A83 91;
+209. ADD A83 1 2;
+210. MLZ -1 B83 0;
+211. MLZ -1 B2 83; endSub11_genliveboard
+212. MLZ -1 238 0;
+213. MLZ -1 255 0; beginSub12_killpiece
+214. ADD A91 1 90;
+215. MLZ -1 A86 A90;
+216. MLZ -1 A91 2;
+217. MLZ -1 A2 86;
+218. MLZ -1 221 A86;
+219. MLZ -1 257 0;
+220. ADD A86 2 91; call18_clearpiece
+221. SL 1 A8 5;
+222. ADD A13 34 2;
+223. OR B2 A5 A2;
+224. SL 1 A9 5;
+225. ADD A14 34 2;
+226. OR B2 A5 A2;
+227. SL 1 A10 5;
+228. ADD A15 34 2;
+229. OR B2 A5 A2;
+230. SL 1 A11 5;
+231. ADD A16 34 2;
+232. OR B2 A5 A2;
+233. MLZ -1 A84 91;
+234. ADD A84 1 2;
+235. MLZ -1 B84 0;
+236. MLZ -1 B2 84; endSub12_killpiece
+237. MLZ -1 256 0;
+238. MLZ -1 284 0; beginSub13_collisiontest
+239. ADD A23 34 2;
+240. SRL B2 A18 27;
+241. ADD A24 34 2;
+242. SRL B2 A19 5;
+243. OR A27 A5 27;
+244. ADD A25 34 2;
+245. SRL B2 A20 5;
+246. OR A27 A5 27;
+247. ADD A26 34 2;
+248. SRL B2 A21 5;
+249. OR A27 A5 27;
+250. AND A27 1 27;
+251. MLZ -1 A85 91;
+252. ADD A85 1 2;
+253. MLZ -1 B85 0;
+254. MLZ -1 B2 85; endSub13_collisiontest
+255. MLZ -1 285 0;
+256. MLZ -1 313 0; beginSub14_clearpiece
+257. MLZ -1 0 58;
+258. MLZ -1 0 59;
+259. MLZ -1 0 60;
+260. MLZ -1 0 61;
+261. MLZ -1 0 62;
+262. MLZ -1 0 63;
+263. MLZ -1 0 64;
+264. MLZ -1 0 65;
+265. MLZ -1 0 66;
+266. MLZ -1 0 67;
+267. MLZ -1 0 68;
+268. MLZ -1 0 69;
+269. MLZ -1 0 70;
+270. MLZ -1 0 71;
+271. MLZ -1 0 72;
+272. MLZ -1 0 73;
+273. MLZ -1 0 74;
+274. MLZ -1 0 75;
+275. MLZ -1 0 76;
+276. MLZ -1 0 77;
+277. MLZ -1 0 78;
+278. MLZ -1 0 79;
+279. MLZ -1 0 80;
+280. MLZ -1 A86 91;
+281. ADD A86 1 2;
+282. MLZ -1 B86 0;
+283. MLZ -1 B2 86; endSub14_clearpiece
+284. MLZ -1 314 0;
+285. MLZ -1 327 0; beginSub15_clearboard
+286. MLZ -1 65535 34;
+287. MLZ -1 65535 35;
+288. MLZ -1 57351 36;
+289. MLZ -1 57351 37;
+290. MLZ -1 57351 38;
+291. MLZ -1 57351 39;
+292. MLZ -1 57351 40;
+293. MLZ -1 57351 41;
+294. MLZ -1 57351 42;
+295. MLZ -1 57351 43;
+296. MLZ -1 57351 44;
+297. MLZ -1 57351 45;
+298. MLZ -1 57351 46;
+299. MLZ -1 57351 47;
+300. MLZ -1 57351 48;
+301. MLZ -1 57351 49;
+302. MLZ -1 57351 50;
+303. MLZ -1 57351 51;
+304. MLZ -1 57351 52;
+305. MLZ -1 57351 53;
+306. MLZ -1 57351 54;
+307. MLZ -1 57351 55;
+308. MLZ -1 57351 56;
+309. MLZ -1 A87 91;
+310. ADD A87 1 2;
+311. MLZ -1 B87 0;
+312. MLZ -1 B2 87; endSub15_clearboard
+313. MLZ -1 328 0;
+314. MLZ -1 341 0; beginSub16_dropz
+315. MLZ -1 6 18;
+316. MLZ -1 7 19;
+317. MLZ -1 7 20;
+318. MLZ -1 8 21;
+319. MLZ -1 20 23;
+320. MLZ -1 20 24;
+321. MLZ -1 19 25;
+322. MLZ -1 19 26;
+323. MLZ -1 A88 91;
+324. ADD A88 1 2;
+325. MLZ -1 B88 0;
+326. MLZ -1 B2 88; endSub16_dropz
+327. MLZ -1 341 0;
+328. MLZ 0 0 0; beginSub17_drops
+329. MLZ -1 6 18;
+330. MLZ -1 7 19;
+331. MLZ -1 7 20;
+332. MLZ -1 8 21;
+333. MLZ -1 19 23;
+334. MLZ -1 20 24;
+335. MLZ -1 19 25;
+336. MLZ -1 20 26;
+337. MLZ -1 A89 91;
+338. ADD A89 1 2;
+339. MLZ -1 B89 0;
+340. MLZ -1 B2 89; endSub17_drops
