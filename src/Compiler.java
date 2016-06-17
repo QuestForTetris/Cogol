@@ -66,7 +66,7 @@ public class Compiler {
   // separators, repetition is ignored
   static final String seps = " \t";
   static final String digits = "0123456789";
-  static final String forbid = "~`@%|/'";
+  static final String forbid = "~`@%/'";
 
   /**
    * splits text into tokens, appended to list is magic
