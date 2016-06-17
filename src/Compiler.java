@@ -168,7 +168,7 @@ public class Compiler {
             String ereyest = tokens.get(tokens.size() - 2).substring(
                 tokens.get(tokens.size() - 2).length() - 1);
             if (curtoken.equals("") && yest.equals("-")
-                && (singletons + reps + seps).contains(ereyest)) {
+                && (reps + seps).contains(ereyest)) {
               curtoken = tokens.remove(tokens.size() - 1);
             }
           }
