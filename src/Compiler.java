@@ -726,6 +726,7 @@ public class Compiler {
   public static void compileLoopStop(ArrayList<Command> ROM) {
     tokens.remove(0); // }
     OpenLoop loop = loops.remove(0);
+    int startloc = ROM.size();
     ROM.addAll(loop.commands);
     if (loop.type.equals("if")) {
       if (tokens.get(0).equals("else")) {
@@ -818,7 +819,7 @@ public class Compiler {
     }
     if (loop.type.equals("if") || loop.type.equals("else")
         || loop.type.equals("sub") || loop.type.equals("doWhile")) {
-      if (prevCall == null || loop.commands.size() > 0) {
+      if (prevCall == null || ROM.size() > startloc) {
         ROM.get(ROM.size() - 1).tags.add("end" + loop);
       } else {
         prevCall.tags.add("end" + loop);
