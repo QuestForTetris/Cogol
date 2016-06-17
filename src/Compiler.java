@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +26,12 @@ public class Compiler {
       sourcefile = args[0];
     }
     Scanner in = new Scanner(new File(sourcefile));
+    String outputfile = "code.qftasm";
+    if (args.length > 1) {
+      outputfile = args[1];
+    }
+    PrintWriter out = new PrintWriter(new File(outputfile));
+    
     System.out.println("\nSource Cogol:");
     while (in.hasNextLine()) {
       String line = in.nextLine();
@@ -42,6 +49,10 @@ public class Compiler {
     System.out.println("\nCompiled QFTASM:");
     for (int i = 0; i < mainROM.size(); i++) {
       System.out.println(i + ". " + mainROM.get(i));
+      if(i > 0){
+        out.println();
+      }
+      out.print(i + ". " + mainROM.get(i));
     }
 
     System.out.println("\nRAM map:");
@@ -55,6 +66,8 @@ public class Compiler {
         System.out.println(i + ": " + subroutine.get(sub).RAMmap.get(i));
       }
     }
+
+    out.close();
   }
 
   static ArrayList<String> tokens = new ArrayList<String>();
