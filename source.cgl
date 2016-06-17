@@ -22,13 +22,28 @@ sub random() {
 }
 
 my x[4] = {5,6,6,7};
-my y[4] = {4,4,3,3};
+my y[4] = {10,10,9,9};
 my xt[4];
 my yt[4];
 
-call rotateClockwise();
+call clearBoard();
 
-call genTestBoard();
+call rotateClockwise();
+my collision;
+call collisionTest();
+while (collision < 1){
+  call updateLive();
+  call genLiveBoard();
+  call rotateClockwise();
+  call collisionTest();
+  if(collision == 0){
+    call updateLive();
+    call genLiveBoard();
+  }
+  call moveDown();
+  call collisionTest();
+  display = collision;
+}
 
 sub rotateClockwise(){
   xt[0] = y[0] - y[1];
@@ -45,6 +60,30 @@ sub rotateClockwise(){
   xt[3] += x[1];
   yt[3] = x[1] - x[3];
   yt[3] += y[1];
+}
+
+sub moveRight(){
+  xt[0] = x[0] + 1;
+  xt[1] = x[1] + 1;
+  xt[2] = x[2] + 1;
+  xt[3] = x[3] + 1;
+}
+
+sub moveLeft(){
+  xt[0] = x[0] - 1;
+  xt[1] = x[1] - 1;
+  xt[2] = x[2] - 1;
+  xt[3] = x[3] - 1;
+}
+
+sub moveDown(){
+  yt[0] = y[0] - 1;
+  yt[1] = y[1] - 1;
+  yt[2] = y[2] - 1;
+  yt[3] = y[3] - 1;
+}
+
+sub updateLive(){
   x[0] = xt[0];
   y[0] = yt[0];
   x[1] = xt[1];
@@ -55,55 +94,86 @@ sub rotateClockwise(){
   y[3] = yt[3];
 }
 
-my deadboard[22];
-my liveboard[22];
-my testboard[22];
+my deadboard[23];
+my liveboard[23];
 my row;
 my i;
 
-sub genTestBoard(){
+sub genLiveBoard(){
+  call clearPiece();
+  shifted = 1 << x[0];
+  liveboard[y[0]] |= shifted;
+  shifted = 1 << x[1];
+  liveboard[y[1]] |= shifted;
+  shifted = 1 << x[2];
+  liveboard[y[2]] |= shifted;
+  shifted = 1 << x[3];
+  liveboard[y[3]] |= shifted;
+}
+
+sub collisionTest(){
+  collision = deadboard[yt[0]] >>> xt[0];
+  shifted = deadboard[yt[1]] >>> xt[1];
+  collision |= shifted;
+  shifted = deadboard[yt[2]] >>> xt[2];
+  collision |= shifted;
+  shifted = deadboard[yt[3]] >>> xt[3];
+  collision |= shifted;
+  collision &= 1;
+}
+
+sub clearPiece(){
   # loop unrolling because loops are slow
   # since these are all static addresses
   # they are optimized by the compiler
   # to be one instruction per line
-  testboard[0] = 0;
-  testboard[1] = 0;
-  testboard[2] = 0;
-  testboard[3] = 0;
-  testboard[4] = 0;
-  testboard[5] = 0;
-  testboard[6] = 0;
-  testboard[7] = 0;
-  testboard[8] = 0;
-  testboard[9] = 0;
-  testboard[10] = 0;
-  testboard[11] = 0;
-  testboard[12] = 0;
-  testboard[13] = 0;
-  testboard[14] = 0;
-  testboard[15] = 0;
-  testboard[16] = 0;
-  testboard[17] = 0;
-  testboard[18] = 0;
-  testboard[19] = 0;
-  testboard[20] = 0;
-  testboard[21] = 0;
-  shifted = 1 << xt[0];
-  testboard[yt[0]] |= shifted;
-  shifted = 1 << xt[1];
-  testboard[yt[1]] |= shifted;
-  shifted = 1 << xt[2];
-  testboard[yt[2]] |= shifted;
-  shifted = 1 << xt[3];
-  testboard[yt[3]] |= shifted;
+  liveboard[0] = 0;
+  liveboard[1] = 0;
+  liveboard[2] = 0;
+  liveboard[3] = 0;
+  liveboard[4] = 0;
+  liveboard[5] = 0;
+  liveboard[6] = 0;
+  liveboard[7] = 0;
+  liveboard[8] = 0;
+  liveboard[9] = 0;
+  liveboard[10] = 0;
+  liveboard[11] = 0;
+  liveboard[12] = 0;
+  liveboard[13] = 0;
+  liveboard[14] = 0;
+  liveboard[15] = 0;
+  liveboard[16] = 0;
+  liveboard[17] = 0;
+  liveboard[18] = 0;
+  liveboard[19] = 0;
+  liveboard[20] = 0;
+  liveboard[21] = 0;
+  liveboard[22] = 0;
 }
 
-my collision;
-sub collisionTest(){
-  i = 0;
-  do {
-    shifted = 1 << xt[i];
-    testboard[yt[i]] |= shifted;
-    i++;
-  } while (i < 4);
+sub clearBoard(){
+  deadboard[0] = 65535;
+  deadboard[1] = 65535;
+  deadboard[2] = 57351;
+  deadboard[3] = 57351;
+  deadboard[4] = 57351;
+  deadboard[5] = 57351;
+  deadboard[6] = 57351;
+  deadboard[7] = 57351;
+  deadboard[8] = 57351;
+  deadboard[9] = 57351;
+  deadboard[10] = 57351;
+  deadboard[11] = 57351;
+  deadboard[12] = 57351;
+  deadboard[13] = 57351;
+  deadboard[14] = 57351;
+  deadboard[15] = 57351;
+  deadboard[16] = 57351;
+  deadboard[17] = 57351;
+  deadboard[18] = 57351;
+  deadboard[19] = 57351;
+  deadboard[20] = 57351;
+  deadboard[21] = 57351;
+  deadboard[22] = 57351;
 }
