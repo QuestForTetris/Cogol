@@ -1,0 +1,129 @@
+
+# no subroutines
+
+my randval;
+my rand = 1;
+my shifted;
+
+my x[4];
+my y[4];
+my xt[4];
+my yt[4];
+
+my deadboard[23];
+
+  deadboard[0] = 57351;
+  deadboard[1] = 57351;
+  deadboard[2] = 57351;
+  deadboard[3] = 57351;
+  deadboard[4] = 57351;
+  deadboard[5] = 57351;
+  deadboard[6] = 57351;
+  deadboard[7] = 57351;
+  deadboard[8] = 57351;
+  deadboard[9] = 57351;
+  deadboard[10] = 57351;
+  deadboard[11] = 57351;
+  deadboard[12] = 57351;
+  deadboard[13] = 57351;
+  deadboard[14] = 57351;
+  deadboard[15] = 57351;
+  deadboard[16] = 57351;
+  deadboard[17] = 57351;
+  deadboard[18] = 57351;
+  deadboard[19] = 57351;
+  deadboard[20] = 57351;
+  deadboard[21] = 65535;
+  deadboard[22] = 65535;
+  xt[0] = 6;
+  xt[1] = 7;
+  xt[2] = 7;
+  xt[3] = 8;
+  yt[0] = 20;
+  yt[1] = 20;
+  yt[2] = 19;
+  yt[3] = 19;
+my collision;
+do main {
+  while (collision < 1){
+      shifted = 1 << x[0];
+      deadboard[y[0]] &!= shifted;
+      shifted = 1 << x[1];
+      deadboard[y[1]] &!= shifted;
+      shifted = 1 << x[2];
+      deadboard[y[2]] &!= shifted;
+      shifted = 1 << x[3];
+      deadboard[y[3]] &!= shifted;
+      x[0] = xt[0];
+      y[0] = yt[0];
+      x[1] = xt[1];
+      y[1] = yt[1];
+      x[2] = xt[2];
+      y[2] = yt[2];
+      x[3] = xt[3];
+      y[3] = yt[3];
+      yt[0] = y[0] + 1;
+      yt[1] = y[1] + 1;
+      yt[2] = y[2] + 1;
+      yt[3] = y[3] + 1;
+      collision = deadboard[yt[0]] >>> xt[0];
+      shifted = deadboard[yt[1]] >>> xt[1];
+      collision |= shifted;
+      shifted = deadboard[yt[2]] >>> xt[2];
+      collision |= shifted;
+      shifted = deadboard[yt[3]] >>> xt[3];
+      collision |= shifted;
+      collision &= 1;
+            shifted = 1 << x[0];
+      deadboard[y[0]] |= shifted;
+      shifted = 1 << x[1];
+      deadboard[y[1]] |= shifted;
+      shifted = 1 << x[2];
+      deadboard[y[2]] |= shifted;
+      shifted = 1 << x[3];
+      deadboard[y[3]] |= shifted;
+    display = collision;
+  }
+    shifted = rand << 1;
+    rand ^= shifted;
+    shifted = rand >>> 5;
+    rand ^= shifted;
+    shifted = rand << 2;
+    rand ^= shifted;
+  randval = rand & 1;
+  if(randval == 0){
+      xt[0] = 6;
+      xt[1] = 7;
+      xt[2] = 7;
+      xt[3] = 8;
+      yt[0] = 2;
+      yt[1] = 2;
+      yt[2] = 1;
+      yt[3] = 1;
+  } else {
+      xt[0] = 6;
+      xt[1] = 7;
+      xt[2] = 7;
+      xt[3] = 8;
+      yt[0] = 1;
+      yt[1] = 2;
+      yt[2] = 1;
+      yt[3] = 2;
+  }
+    collision = deadboard[yt[0]] >>> xt[0];
+    shifted = deadboard[yt[1]] >>> xt[1];
+    collision |= shifted;
+    shifted = deadboard[yt[2]] >>> xt[2];
+    collision |= shifted;
+    shifted = deadboard[yt[3]] >>> xt[3];
+    collision |= shifted;
+    collision &= 1;
+          x[0] = xt[0];
+      y[0] = yt[0];
+      x[1] = xt[1];
+      y[1] = yt[1];
+      x[2] = xt[2];
+      y[2] = yt[2];
+      x[3] = xt[3];
+      y[3] = yt[3];
+} while (collision < 1);
