@@ -444,7 +444,6 @@ public class Compiler {
    * Fills in argument values based on tags
    */
   public static void fillTags() {
-
     Map<String, Integer> tagLocs = new HashMap<String, Integer>();
     for (int i = 0; i < mainROM.size(); i++) {
       Command c = mainROM.get(i);
@@ -506,13 +505,7 @@ public class Compiler {
    * ROM
    */
   static void adjustJumps() {
-    for (int i = 0; i < mainROM.size() - 1; i++) {
-      Command c = mainROM.get(i);
-      if (c.isEquivalent("MLZ", null, null, 0, null, 0, 0)
-          || c.isEquivalent("MNZ", null, null, 0, null, 0, 0)) {
-        c.arg2.val--;
-      }
-    }
+    mainROM.add(0, new Command("MLZ", new Arg(0), new Arg(0), new Arg(0)));
   }
 
   /**
