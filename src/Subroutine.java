@@ -63,8 +63,8 @@ public class Subroutine {
     type.put(varname, Compiler.wordType);
     ROMpredefs.add(new Command("ADD", new Arg(1, name, 0),
         new Arg(firstFreeRAM), new Arg(Compiler.CallStackPointer, 0)));
-    ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(data), new Arg(1,
-        Compiler.CallStackPointer, 0)));
+    ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(data),
+        new Arg(1, Compiler.CallStackPointer, 0)));
     firstFreeRAM++;
   }
 
@@ -85,8 +85,8 @@ public class Subroutine {
       setRAM(firstFreeRAM, varname + "[" + i + "]");
       firstFreeRAM++;
     }
-    ROMpredefs.add(new Command("ADD", new Arg(1, name, 0), new Arg(address
-        .get(varname)), new Arg(Compiler.CallStackPointer, 0)));
+    ROMpredefs.add(new Command("ADD", new Arg(1, name, 0),
+        new Arg(address.get(varname)), new Arg(Compiler.CallStackPointer, 0)));
     ROMpredefs.add(new Command("ADD", new Arg(1, Compiler.CallStackPointer, 0),
         new Arg(1), new Arg(1, Compiler.CallStackPointer, 0)));
   }
@@ -110,10 +110,10 @@ public class Subroutine {
       setRAM(firstFreeRAM, varname + "[" + i + "]");
       if (data.size() > 0) {
         int datum = data.remove(0);
-        ROMpredefs.add(new Command("ADD", new Arg(1, name, 0), new Arg(
-            firstFreeRAM), new Arg(Compiler.CallStackPointer, 0)));
-        ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(datum), new Arg(
-            1, Compiler.CallStackPointer, 0)));
+        ROMpredefs.add(new Command("ADD", new Arg(1, name, 0),
+            new Arg(firstFreeRAM), new Arg(Compiler.CallStackPointer, 0)));
+        ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(datum),
+            new Arg(1, Compiler.CallStackPointer, 0)));
       }
       firstFreeRAM++;
     }
@@ -125,14 +125,14 @@ public class Subroutine {
       if (datum != 0) {
         ROMpredefs.add(new Command("ADD", new Arg(1, name, 0), new Arg(marker),
             new Arg(Compiler.CallStackPointer, 0)));
-        ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(datum), new Arg(
-            1, Compiler.CallStackPointer, 0)));
+        ROMpredefs.add(new Command("MLZ", new Arg(-1), new Arg(datum),
+            new Arg(1, Compiler.CallStackPointer, 0)));
       }
       marker++;
       index++;
     }
-    ROMpredefs.add(new Command("ADD", new Arg(1, name, 0), new Arg(address
-        .get(varname)), new Arg(Compiler.CallStackPointer, 0)));
+    ROMpredefs.add(new Command("ADD", new Arg(1, name, 0),
+        new Arg(address.get(varname)), new Arg(Compiler.CallStackPointer, 0)));
     ROMpredefs.add(new Command("ADD", new Arg(1, Compiler.CallStackPointer, 0),
         new Arg(1), new Arg(1, Compiler.CallStackPointer, 0)));
   }
@@ -156,8 +156,8 @@ public class Subroutine {
     if (address.containsKey(name)) {
       System.err.println("error: my " + name + rmStatement(tokens));
     } else if (Compiler.reserved.contains(name)) {
-      System.err.println("error: reserved name at " + name
-          + rmStatement(tokens));
+      System.err
+          .println("error: reserved name at " + name + rmStatement(tokens));
     } else {
       String type = tokens.remove(0);
       if (type.equals("[")) {
@@ -212,8 +212,8 @@ public class Subroutine {
               + " = " + init + rmStatement(tokens));
         }
       } else {
-        System.err.println("error: my " + name + " " + type
-            + rmStatement(tokens));
+        System.err
+            .println("error: my " + name + " " + type + rmStatement(tokens));
       }
     }
   }

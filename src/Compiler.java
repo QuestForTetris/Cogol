@@ -21,7 +21,7 @@ public class Compiler {
    * @throws FileNotFoundException
    */
   public static void main(String[] args) throws FileNotFoundException {
-    String sourcefile = "source.cgl";
+    String sourcefile = "primes.cgl";
     if (args.length > 0) {
       sourcefile = args[0];
     }
@@ -46,6 +46,7 @@ public class Compiler {
     joinParts();
     fillTags();
     simplify();
+    adjustJumps();
     System.out.println("\nCompiled QFTASM:");
     for (int i = 0; i < mainROM.size(); i++) {
       System.out.println(i + ". " + mainROM.get(i));
@@ -165,8 +166,8 @@ public class Compiler {
         if (digits.contains(curchar)) {
           if (tokens.size() > 1) {
             String yest = tokens.get(tokens.size() - 1);
-            String ereyest = tokens.get(tokens.size() - 2).substring(
-                tokens.get(tokens.size() - 2).length() - 1);
+            String ereyest = tokens.get(tokens.size() - 2)
+                .substring(tokens.get(tokens.size() - 2).length() - 1);
             if (curtoken.equals("") && yest.equals("-")
                 && (reps + seps).contains(ereyest)) {
               curtoken = tokens.remove(tokens.size() - 1);
@@ -216,12 +217,13 @@ public class Compiler {
    * @param data
    *          Initializer constant.
    */
-  public static void createWord(ArrayList<Command> ROM, String name, int data) {
+  public static void createWord(ArrayList<Command> ROM, String name,
+      int data) {
     setRAM(firstFreeRAM, name);
     type.put(name, wordType);
     if (data != 0) {
-      ROM.add(new Command("MLZ", new Arg(-1), new Arg(data), new Arg(
-          firstFreeRAM)));
+      ROM.add(new Command("MLZ", new Arg(-1), new Arg(data),
+          new Arg(firstFreeRAM)));
     }
     firstFreeRAM++;
   }
@@ -232,7 +234,8 @@ public class Compiler {
    * @param size
    *          Reserved size of array
    */
-  public static void createArray(ArrayList<Command> ROM, String name, int size) {
+  public static void createArray(ArrayList<Command> ROM, String name,
+      int size) {
     setRAM(firstFreeRAM, name);
     type.put(name, arrayType);
     firstFreeRAM++;
@@ -262,8 +265,8 @@ public class Compiler {
       if (data.size() > 0) {
         int datum = data.remove(0);
         if (datum != 0) {
-          ROM.add(new Command("MLZ", new Arg(-1), new Arg(datum), new Arg(
-              firstFreeRAM)));
+          ROM.add(new Command("MLZ", new Arg(-1), new Arg(datum),
+              new Arg(firstFreeRAM)));
         }
       }
       firstFreeRAM++;
@@ -274,7 +277,8 @@ public class Compiler {
       setRAM(marker, name + "[" + index + "]");
       int datum = data.remove(0);
       if (datum != 0) {
-        ROM.add(new Command("MLZ", new Arg(-1), new Arg(datum), new Arg(marker)));
+        ROM.add(
+            new Command("MLZ", new Arg(-1), new Arg(datum), new Arg(marker)));
       }
       marker++;
       index++;
@@ -355,7 +359,8 @@ public class Compiler {
         int startsize = mainROM.size();
         if (tokens.get(0).equals("my")) {
           compileDef();
-        } else if (tokens.get(0).equals("if") || tokens.get(0).equals("while")) {
+        } else if (tokens.get(0).equals("if")
+            || tokens.get(0).equals("while")) {
           compileLoopStart(mainROM);
         } else if (tokens.get(0).equals("do")) {
           compileDoWhile(mainROM);
@@ -395,7 +400,8 @@ public class Compiler {
       this.loc = loc;
       this.statement = statement;
       cursubs.addAll(subs);
-      returnsPointer = statement.lastIndexOf(")") >= statement.lastIndexOf(".");
+      returnsPointer = statement.lastIndexOf(")") >= statement
+          .lastIndexOf(".");
     }
 
     String pointerName() {
@@ -491,6 +497,20 @@ public class Compiler {
             c.arg2.val++;
           }
         }
+      }
+    }
+  }
+
+  /**
+   * Changes all jump statements (like MLZ _ N 0) to point to the N-1 spot in
+   * ROM
+   */
+  static void adjustJumps() {
+    for (int i = 0; i < mainROM.size() - 1; i++) {
+      Command c = mainROM.get(i);
+      if (c.isEquivalent("MLZ", null, null, 0, null, 0, 0)
+          || c.isEquivalent("MNZ", null, null, 0, null, 0, 0)) {
+        c.arg2.val--;
       }
     }
   }
@@ -602,8 +622,8 @@ public class Compiler {
           }
           cond.add(new Command("SUB", arg1, arg2, testdest));
         }
-        cond.add(new Command("MLZ", test, new Arg("begin" + loop, 2), new Arg(
-            address.get(ProgramCounter))));
+        cond.add(new Command("MLZ", test, new Arg("begin" + loop, 2),
+            new Arg(address.get(ProgramCounter))));
       } else if (op.equals("!=")) {
         if (arg2.mode == 0 && arg2.val == 0) {
           test = arg1;
@@ -617,11 +637,11 @@ public class Compiler {
           test.mode++;
           cond.add(new Command("SUB", arg1, arg2, testdest));
         }
-        cond.add(new Command("MNZ", test, new Arg("begin" + loop, 2), new Arg(
-            address.get(ProgramCounter))));
+        cond.add(new Command("MNZ", test, new Arg("begin" + loop, 2),
+            new Arg(address.get(ProgramCounter))));
       } else {
-        System.err.println("error: condition " + type + " " + op
-            + " not supported");
+        System.err
+            .println("error: condition " + type + " " + op + " not supported");
       }
       compileDelaySlot(ROM);
       int endloc = cond.size() - 1;
@@ -668,8 +688,8 @@ public class Compiler {
           test.mode++;
           ROM.add(new Command("SUB", arg1, arg2, testdest));
         }
-        ROM.add(new Command("MNZ", test, new Arg("end" + loop, 1), new Arg(
-            address.get(ProgramCounter))));
+        ROM.add(new Command("MNZ", test, new Arg("end" + loop, 1),
+            new Arg(address.get(ProgramCounter))));
         compileDelaySlot(ROM);
         ROM.get(ROM.size() - 2).tags.add("begin" + loop);
       } else if (op.equals(">=") || op.equals("<=")) {
@@ -688,8 +708,8 @@ public class Compiler {
           test.mode++;
           ROM.add(new Command("SUB", arg1, arg2, testdest));
         }
-        ROM.add(new Command("MLZ", test, new Arg("end" + loop, 1), new Arg(
-            address.get(ProgramCounter))));
+        ROM.add(new Command("MLZ", test, new Arg("end" + loop, 1),
+            new Arg(address.get(ProgramCounter))));
         compileDelaySlot(ROM);
         ROM.get(ROM.size() - 2).tags.add("begin" + loop);
       } else if (op.equals(">") || op.equals("<")) {
@@ -706,13 +726,13 @@ public class Compiler {
 
         ROM.add(new Command("ADD", arg1, new Arg(1), testdest));
         ROM.add(new Command("SUB", test, arg2, testdest));
-        ROM.add(new Command("MLZ", test, new Arg("end" + loop, 1), new Arg(
-            address.get(ProgramCounter))));
+        ROM.add(new Command("MLZ", test, new Arg("end" + loop, 1),
+            new Arg(address.get(ProgramCounter))));
         compileDelaySlot(ROM);
         ROM.get(ROM.size() - 2).tags.add("begin" + loop);
       } else {
-        System.err.println("error: condition " + type + " " + op
-            + " not supported");
+        System.err
+            .println("error: condition " + type + " " + op + " not supported");
       }
     }
   }
@@ -795,8 +815,8 @@ public class Compiler {
           }
           ROM.add(new Command("SUB", arg1, arg2, testdest));
         }
-        ROM.add(new Command("MLZ", test, new Arg("begin" + loop, 1), new Arg(
-            address.get(ProgramCounter))));
+        ROM.add(new Command("MLZ", test, new Arg("begin" + loop, 1),
+            new Arg(address.get(ProgramCounter))));
       } else if (op.equals("!=")) {
         if (arg2.mode == 0 && arg2.val == 0) {
           test = arg1;
@@ -810,10 +830,11 @@ public class Compiler {
           test.mode++;
           ROM.add(new Command("SUB", arg1, arg2, testdest));
         }
-        ROM.add(new Command("MNZ", test, new Arg("begin" + loop, 1), new Arg(
-            address.get(ProgramCounter))));
+        ROM.add(new Command("MNZ", test, new Arg("begin" + loop, 1),
+            new Arg(address.get(ProgramCounter))));
       } else {
-        System.err.println("error: condition doWhile " + op + " not supported");
+        System.err
+            .println("error: condition doWhile " + op + " not supported");
       }
       compileDelaySlot(ROM);
     }
@@ -926,7 +947,8 @@ public class Compiler {
     }
     Arg arg1 = null;
     if (reserved.contains(name)) {
-      System.err.println("error: reserved address at: " + name + rmStatement());
+      System.err
+          .println("error: reserved address at: " + name + rmStatement());
       return null;
     }
     try {
@@ -947,8 +969,8 @@ public class Compiler {
     }
     if (!address.containsKey(name) && isLocal == null
         && !tokens.get(0).equals(".")) {
-      System.err.println("error: undeclared variable at: " + name
-          + rmStatement());
+      System.err
+          .println("error: undeclared variable at: " + name + rmStatement());
       return null;
     }
     String reftype = tokens.get(0);
@@ -978,7 +1000,8 @@ public class Compiler {
           } else {
             temp = mallocS();
           }
-          ROM.add(new Command("ADD", new Arg(1, address.get(name)), index, temp));
+          ROM.add(
+              new Command("ADD", new Arg(1, address.get(name)), index, temp));
           arg1 = new Arg(2, temp.val);
           arg1.scratches.add(temp);
         }
@@ -991,8 +1014,8 @@ public class Compiler {
             } else {
               temp = mallocS();
             }
-            ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0), new Arg(
-                isLocal.address.get(name) + 1 + index.val), temp));
+            ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0),
+                new Arg(isLocal.address.get(name) + 1 + index.val), temp));
             arg1 = new Arg(2, temp.val);
             arg1.scratches.add(temp);
           } else {
@@ -1002,8 +1025,8 @@ public class Compiler {
             } else {
               temp = mallocS();
             }
-            ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0), new Arg(
-                isLocal.address.get(name) + 1), temp));
+            ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0),
+                new Arg(isLocal.address.get(name) + 1), temp));
             ROM.add(new Command("ADD", new Arg(1, temp.val), index, temp));
             arg1 = new Arg(2, temp.val);
             arg1.scratches.add(temp);
@@ -1015,7 +1038,8 @@ public class Compiler {
           } else {
             temp = mallocS();
           }
-          ROM.add(new Command("ADD", new Arg(1, address.get(name)), index, temp));
+          ROM.add(
+              new Command("ADD", new Arg(1, address.get(name)), index, temp));
           arg1 = new Arg(2, temp.val);
           arg1.scratches.add(temp);
         }
@@ -1034,8 +1058,8 @@ public class Compiler {
         for (String s : line) {
           varname += s;
         }
-        ROM.add(new Command("ADD", new Arg(1, address.get(name)), new Arg(
-            varname, 0, vartype), temp));
+        ROM.add(new Command("ADD", new Arg(1, address.get(name)),
+            new Arg(varname, 0, vartype), temp));
         arg1 = new Arg(2, temp.val);
         arg1.scratches.add(temp);
       } else {
@@ -1049,10 +1073,10 @@ public class Compiler {
         for (String s : line) {
           varname += s;
         }
-        ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0), new Arg(
-            isLocal.address.get(name)), temp));
-        ROM.add(new Command("ADD", new Arg(2, temp.val), new Arg(varname, 0,
-            vartype), temp));
+        ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0),
+            new Arg(isLocal.address.get(name)), temp));
+        ROM.add(new Command("ADD", new Arg(2, temp.val),
+            new Arg(varname, 0, vartype), temp));
         arg1 = new Arg(2, temp.val);
         arg1.scratches.add(temp);
       }
@@ -1067,8 +1091,8 @@ public class Compiler {
           System.err.println("warning: " + name + " of incorrect type");
         }
         Arg temp = mallocS();
-        ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0), new Arg(
-            isLocal.address.get(name)), temp));
+        ROM.add(new Command("ADD", new Arg(1, isLocal.name, 0),
+            new Arg(isLocal.address.get(name)), temp));
         arg1 = new Arg(2, temp.val);
         arg1.scratches.add(temp);
       }
@@ -1241,8 +1265,8 @@ public class Compiler {
       System.err.println("error: in-line condition " + op + " not supported");
     }
     if (arg1.mode == 0 && arg2.mode == 0) {
-      System.err.println("warning: constant condition at " + arg1 + " " + op
-          + " " + arg2);
+      System.err.println(
+          "warning: constant condition at " + arg1 + " " + op + " " + arg2);
       if (res.type == 0) {
         if (arg1.val == arg2.val) {
           res.type = -1;
@@ -1318,8 +1342,8 @@ public class Compiler {
     while (!tokens.get(0).equals("{")) {
       sub.compileDef(tokens);
     }
-    ROM.add(new Command("MLZ", new Arg(-1), new Arg("end" + loop, 1), new Arg(
-        ProgramCounter, 0)));
+    ROM.add(new Command("MLZ", new Arg(-1), new Arg("end" + loop, 1),
+        new Arg(ProgramCounter, 0)));
     compileDelaySlot(ROM);
     ROM.get(ROM.size() - 1).tags.add("begin" + loop);
     Arg temp = mallocS();
@@ -1366,14 +1390,14 @@ public class Compiler {
     String subName = tokens.remove(0);
     Subroutine sub = subroutine.get(subName);
     if (sub == null) {
-      System.err.print("error: undeclared subroutine at call " + subName
-          + rmStatement());
+      System.err.print(
+          "error: undeclared subroutine at call " + subName + rmStatement());
       return;
     }
     Arg temp = mallocS();
     int ID = OpenLoop.nextLoopID++;
-    tempROM.add(new Command("ADD", new Arg(1, CallStackPointer, 0), new Arg(1),
-        temp));
+    tempROM.add(
+        new Command("ADD", new Arg(1, CallStackPointer, 0), new Arg(1), temp));
     tempROM.add(new Command("MLZ", new Arg(-1), new Arg(1, subName, 0),
         new Arg(1, temp.val)));
     freeS(temp);
@@ -1387,7 +1411,8 @@ public class Compiler {
     int argnum = 2; // the first two are call return and previous instance
     // holds commands until after change-of-scope
     ArrayList<Command> defArgROM = new ArrayList<Command>();
-    for (; !tokens.get(0).equals(";") && !tokens.get(0).equals("."); argnum++) {
+    for (; !tokens.get(0).equals(";")
+        && !tokens.get(0).equals("."); argnum++) {
       if (tokens.get(0).equals(",")) {
         tokens.remove(0);
         defArgROM.addAll(sub.inits.get(argnum));
@@ -1396,32 +1421,32 @@ public class Compiler {
 
         String varName = tokens.get(0);
         if (tokens.get(1).equals("[")) {
-          System.err.println("error: unsupported argument type at "
-              + rmStatement());
+          System.err
+              .println("error: unsupported argument type at " + rmStatement());
         } else if (arrayType.equals(varName)) {
-          System.err.println("error: unsupported argument type at "
-              + rmStatement());
+          System.err
+              .println("error: unsupported argument type at " + rmStatement());
         } else {
           Arg source = compileRef(tempROM, false);
           tokens.remove(0); // , or )
 
           temp = mallocS();
 
-          tempROM.add(new Command("ADD",
-              new Arg(pointer.mode + 1, pointer.val), new Arg(argName, 0,
-                  subName), temp));
-          tempROM.add(new Command("MLZ", new Arg(-1), source, new Arg(1,
-              temp.val)));
+          tempROM
+              .add(new Command("ADD", new Arg(pointer.mode + 1, pointer.val),
+                  new Arg(argName, 0, subName), temp));
+          tempROM.add(
+              new Command("MLZ", new Arg(-1), source, new Arg(1, temp.val)));
 
           freeS(temp);
         }
       }
     }
     // change of scope
-    tempROM.add(new Command("MLZ", new Arg(-1), new Arg(pointer.mode + 1,
-        pointer.val), new Arg(subName, 0)));
-    tempROM.add(new Command("MLZ", new Arg(-1), new Arg("call" + ID + "_"
-        + subName, 1), new Arg(1, subName, 0)));
+    tempROM.add(new Command("MLZ", new Arg(-1),
+        new Arg(pointer.mode + 1, pointer.val), new Arg(subName, 0)));
+    tempROM.add(new Command("MLZ", new Arg(-1),
+        new Arg("call" + ID + "_" + subName, 1), new Arg(1, subName, 0)));
     freeS(pointer);
     tempROM.addAll(defArgROM);
     for (; argnum < sub.args.size(); argnum++) {
@@ -1429,8 +1454,8 @@ public class Compiler {
     }
     tempROM.add(new Command("MLZ", new Arg(-1), new Arg("begin" + sub.loop, 1),
         new Arg(ProgramCounter, 0)));
-    tempROM.add(new Command("ADD", new Arg(sub.firstFreeRAM), new Arg(1,
-        sub.name, 0), new Arg(CallStackPointer, 0)));
+    tempROM.add(new Command("ADD", new Arg(sub.firstFreeRAM),
+        new Arg(1, sub.name, 0), new Arg(CallStackPointer, 0)));
     tempROM.get(tempROM.size() - 1).tags.add("call" + ID + "_" + subName);
 
     if (tokens.remove(0).equals(".")) {
@@ -1443,8 +1468,8 @@ public class Compiler {
       temp = mallocS();
       Arg theOGpointerR = theOGpointer.dup();
       theOGpointerR.mode++;
-      tempROM.add(new Command("ADD", new Arg(1, CallStackPointer, 0), new Arg(
-          varname, 0, sub.name), temp));
+      tempROM.add(new Command("ADD", new Arg(1, CallStackPointer, 0),
+          new Arg(varname, 0, sub.name), temp));
       if (eq.equals("=")) {
         tempROM.add(new Command("MLZ", new Arg(-1), new Arg(2, temp.val),
             theOGpointer));
