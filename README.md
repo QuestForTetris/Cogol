@@ -20,7 +20,7 @@ Variables can optionally contain pre-loaded values, which are designated by cons
     my beta[14] = {3,5,7,8};
 As an important note, all pre-loaded values are loaded *once* during the first part of program execution, *before* all other code executes. Even if a variable declaration is placed inside a loop, it will not be re-evaluated. The order of declarations determines the order that the global variables are stored in memory.
 
-When a word is declared, the next available RAM address is assigned to is and is given that name.  When an array is declared, a RAM address is assigned to the array name, and then the next several RAM addresses are assigned to hold the contents of the array.  The first array address (the bare name of the array), is pre-loaded with the address location of the array's first address.  This first address can also serve as a stack pointer.  Here is a typical portion of a RAM map showing a single word and a single array:
+When a word is declared, the next available RAM address is assigned to it and is given that name.  When an array is declared, a RAM address is assigned to the array name, and then the next several RAM addresses are assigned to hold the contents of the array.  The first array address (the bare name of the array), is pre-loaded with the address location of the array's first address.  This first address can also serve as a stack pointer.  Here is a typical portion of a RAM map showing a single word and a single array:
 
     3: sigma
     4: theta     # pre-loaded with the number 5 in this case
