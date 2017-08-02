@@ -104,7 +104,7 @@ sub clearrows(){
     }
     i--;
   }
-  piecescore >>= 1;
+  piecescore >>>= 1;
   score += piecescore;
 }
 
