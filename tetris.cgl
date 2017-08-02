@@ -1,0 +1,283 @@
+my score[0]; # awkward hack to make the display look nicer
+my preview[4];
+my deadboard[23];
+
+my randval;
+my rand = 1;
+my shifted;
+sub random() {
+  shifted = rand << 1;
+  rand ^= shifted;
+  shifted = rand >>> 5;
+  rand ^= shifted;
+  shifted = rand << 2;
+  rand ^= shifted;
+}
+
+my x[4];  # current piece location 
+my y[4];
+my xt[4]; # transposed piece location
+my yt[4];
+my px[4]; # preview piece location
+my py[4];
+
+my x0[8] = {0,6,6,7,6,6,8,6};
+my x1[8] = {0,7,7,8,7,7,7,7};
+my x2[8] = {0,7,7,7,8,8,6,7};
+my x3[8] = {0,8,8,8,9,8,6,8};
+my y0[8] = {0,2,1,1,1,1,1,1};
+my y1[8] = {0,2,2,1,1,1,1,1};
+my y2[8] = {0,1,1,2,1,1,1,2};
+my y3[8] = {0,1,2,2,1,2,2,1};
+
+my collision;
+my piecescore;
+
+my i;
+my j;
+my k;
+
+sub newgame() {
+  score[0] = 65535;
+  i = 0;
+  while (i < 4) {
+    preview[i] = 63519;
+    i++;
+  }
+  preview[4] = 65535;
+  i = 0;
+  while (i < 22) {
+    deadboard[i] = 57351;
+    i++;
+  }
+  deadboard[22] = 65535;
+  
+  call newpreview();
+  call previewdrop();
+  call newpreview();
+  
+  display = 0;
+  collision = 0;
+  score = 0;
+}
+
+call newgame();
+
+do play game {
+  do single piece {
+    call updatepos();
+    call printfallingpiece();
+    call processinput();
+    call unprintfallingpiece();
+    call testcollision();
+    if (collision == 0) {
+      call updatepos();
+      call printfallingpiece();
+    } else {
+      call printfallingpiece();
+      call resetpos();
+    }
+    call moveDown();
+    call unprintfallingpiece();
+    call testcollision();
+  } while (collision < 1);
+  call printfallingpiece();
+  call clearrows();
+  call previewdrop();
+  call newpreview();
+  call testcollision();
+  call updatepos();
+} while (collision < 1);
+
+sub clearrows(){
+  piecescore = 1;
+  i = 21;
+  while (i > 0) {
+    if (deadboard[i] == -1) {
+      j = i;
+      piecescore <<= 1;
+      while (j > 0) {
+        k = j - 1;
+        deadboard[j] = deadboard[k];
+        j--;
+      }
+    }
+    i--;
+  }
+  piecescore >>= 1;
+  score += piecescore;
+}
+
+sub processinput() {
+  if (display == 1) {
+    call rotateCounterclockwise();
+  }
+  if (display == 2) {
+    call moveRight();
+  }
+  if (display == 4) {
+    call moveDown();
+  }
+  if (display == 8) {
+    call moveLeft();
+  }
+  if (display == 16) {
+    call rotateClockwise();
+  }
+  rand ^= display;
+  display = 0;
+}
+
+sub newpreview() {
+  do prng {
+    call random();
+    randval = rand & 7;
+  } while (randval < 1);
+  px[0] = x0[randval];
+  px[1] = x1[randval];
+  px[2] = x2[randval];
+  px[3] = x3[randval];
+  py[0] = y0[randval];
+  py[1] = y1[randval];
+  py[2] = y2[randval];
+  py[3] = y3[randval];
+  call printpreviewpiece();
+}
+
+sub previewdrop() {
+  xt[0] = px[0];
+  xt[1] = px[1];
+  xt[2] = px[2];
+  xt[3] = px[3];
+  yt[0] = py[0];
+  yt[1] = py[1];
+  yt[2] = py[2];
+  yt[3] = py[3];
+  call unprintpreviewpiece();
+}
+
+sub printfallingpiece() {
+  shifted = 1 << x[0];
+  deadboard[y[0]] |= shifted;
+  shifted = 1 << x[1];
+  deadboard[y[1]] |= shifted;
+  shifted = 1 << x[2];
+  deadboard[y[2]] |= shifted;
+  shifted = 1 << x[3];
+  deadboard[y[3]] |= shifted;
+}
+
+sub unprintfallingpiece() {
+  shifted = 1 << x[0];
+  deadboard[y[0]] &!= shifted;
+  shifted = 1 << x[1];
+  deadboard[y[1]] &!= shifted;
+  shifted = 1 << x[2];
+  deadboard[y[2]] &!= shifted;
+  shifted = 1 << x[3];
+  deadboard[y[3]] &!= shifted;
+}
+
+sub printpreviewpiece() {
+  shifted = 1 << px[0];
+  preview[py[0]] |= shifted;
+  shifted = 1 << px[1];
+  preview[py[1]] |= shifted;
+  shifted = 1 << px[2];
+  preview[py[2]] |= shifted;
+  shifted = 1 << px[3];
+  preview[py[3]] |= shifted;
+}
+
+sub unprintpreviewpiece() {
+  preview[1] = 63519;
+  preview[2] = 63519;
+}
+
+sub updatepos() {
+  x[0] = xt[0];
+  y[0] = yt[0];
+  x[1] = xt[1];
+  y[1] = yt[1];
+  x[2] = xt[2];
+  y[2] = yt[2];
+  x[3] = xt[3];
+  y[3] = yt[3];
+}
+
+sub resetpos() {
+  xt[0] = x[0];
+  yt[0] = y[0];
+  xt[1] = x[1];
+  yt[1] = y[1];
+  xt[2] = x[2];
+  yt[2] = y[2];
+  xt[3] = x[3];
+  yt[3] = y[3];
+}
+
+sub testcollision() {
+  collision = deadboard[yt[0]] >>> xt[0];
+  shifted = deadboard[yt[1]] >>> xt[1];
+  collision |= shifted;
+  shifted = deadboard[yt[2]] >>> xt[2];
+  collision |= shifted;
+  shifted = deadboard[yt[3]] >>> xt[3];
+  collision |= shifted;
+  collision &= 1;
+}
+
+sub rotateCounterclockwise(){
+  xt[0] = y[0] - y[1];
+  xt[0] += x[1];
+  yt[0] = x[1] - x[0];
+  yt[0] += y[1];
+  xt[1] = x[1];
+  yt[1] = y[1];
+  xt[2] = y[2] - y[1];
+  xt[2] += x[1];
+  yt[2] = x[1] - x[2];
+  yt[2] += y[1];
+  xt[3] = y[3] - y[1];
+  xt[3] += x[1];
+  yt[3] = x[1] - x[3];
+  yt[3] += y[1];
+}
+
+sub rotateClockwise(){
+  xt[0] = y[1] - y[0];
+  xt[0] += x[1];
+  yt[0] = x[0] - x[1];
+  yt[0] += y[1];
+  xt[1] = x[1];
+  yt[1] = y[1];
+  xt[2] = y[1] - y[2];
+  xt[2] += x[1];
+  yt[2] = x[2] - x[1];
+  yt[2] += y[1];
+  xt[3] = y[1] - y[3];
+  xt[3] += x[1];
+  yt[3] = x[3] - x[1];
+  yt[3] += y[1];
+}
+
+sub moveRight(){
+  xt[0] = x[0] + 1;
+  xt[1] = x[1] + 1;
+  xt[2] = x[2] + 1;
+  xt[3] = x[3] + 1;
+}
+
+sub moveLeft(){
+  xt[0] = x[0] - 1;
+  xt[1] = x[1] - 1;
+  xt[2] = x[2] - 1;
+  xt[3] = x[3] - 1;
+}
+
+sub moveDown(){
+  yt[0] = y[0] + 1;
+  yt[1] = y[1] + 1;
+  yt[2] = y[2] + 1;
+  yt[3] = y[3] + 1;
+}
