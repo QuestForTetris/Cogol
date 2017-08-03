@@ -37,13 +37,13 @@ board[22] = 65535;
 
 call newpreview();
 call previewdrop();
-call newpreview();
 
 display = 0;
 collision = 0;
 score = 0;
 
 do play game {
+  call newpreview();
   do single piece {
     call updatepos();
     call printfallingpiece();
@@ -149,9 +149,7 @@ do play game {
   score += piecescore;
   
   call previewdrop();
-  call newpreview();
   call testcollision();
-  call updatepos();
 } while (collision < 1);
 
 sub newpreview() {
