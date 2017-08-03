@@ -111,7 +111,14 @@ do play game {
       call printfallingpiece();
     } else invalid move {
       call printfallingpiece();
-      call resetpos();
+      xt[0] = x[0];
+      yt[0] = y[0];
+      xt[1] = x[1];
+      yt[1] = y[1];
+      xt[2] = x[2];
+      yt[2] = y[2];
+      xt[3] = x[3];
+      yt[3] = y[3];
     }
     yt[0] = y[0] + 1;
     yt[1] = y[1] + 1;
@@ -281,17 +288,6 @@ sub updatepos() {
   y[2] = yt[2];
   x[3] = xt[3];
   y[3] = yt[3];
-}
-
-sub resetpos() {
-  xt[0] = x[0];
-  yt[0] = y[0];
-  xt[1] = x[1];
-  yt[1] = y[1];
-  xt[2] = x[2];
-  yt[2] = y[2];
-  xt[3] = x[3];
-  yt[3] = y[3];
 }
 
 sub testcollision() {
