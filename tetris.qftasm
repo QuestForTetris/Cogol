@@ -2,431 +2,430 @@
 1. MLZ -1 4 3;
 2. MLZ -1 5 4;
 3. MLZ -1 10 9;
-4. MLZ -1 1 34;
-5. MLZ -1 37 36;
-6. MLZ -1 42 41;
-7. MLZ -1 47 46;
-8. MLZ -1 52 51;
-9. MLZ -1 57 56;
-10. MLZ -1 62 61;
-11. MLZ -1 79 78; preloadCallStack
+4. MLZ -1 1 35;
+5. MLZ -1 38 37;
+6. MLZ -1 43 42;
+7. MLZ -1 48 47;
+8. MLZ -1 53 52;
+9. MLZ -1 58 57;
+10. MLZ -1 63 62;
+11. MLZ -1 80 79; preloadCallStack
 12. MLZ -1 65535 4;
-13. MLZ -1 0 68; beginDoWhile0_clear_preview
-14. ADD A68 5 2;
+13. MLZ -1 0 69; beginDoWhile0_clear_preview
+14. ADD A69 5 2;
 15. MLZ -1 63519 A2;
-16. ADD A68 1 68;
-17. ADD A68 -4 2;
+16. ADD A69 1 69;
+17. ADD A69 -4 2;
 18. MLZ A2 13 0;
 19. MLZ 0 0 0; endDoWhile0_clear_preview
 20. MLZ -1 65535 9;
-21. MLZ -1 0 68; beginDoWhile1_clear_board
-22. ADD A68 10 2;
+21. MLZ -1 0 69; beginDoWhile1_clear_board
+22. ADD A69 10 2;
 23. MLZ -1 57351 A2;
-24. ADD A68 1 68;
-25. ADD A68 -22 2;
+24. ADD A69 1 69;
+25. ADD A69 -22 2;
 26. MLZ A2 21 0;
 27. MLZ 0 0 0; endDoWhile1_clear_board
 28. MLZ -1 65535 32;
-29. ADD A78 1 71;
-30. MLZ -1 A72 A71;
-31. MLZ -1 A78 2;
-32. MLZ -1 A2 72;
-33. MLZ -1 35 A72;
-34. MLZ -1 244 0;
-35. ADD A72 2 78; call43_newpreview
-36. ADD A78 1 71;
-37. MLZ -1 A73 A71;
-38. MLZ -1 A78 2;
-39. MLZ -1 A2 73;
-40. MLZ -1 42 A73;
-41. MLZ -1 349 0;
-42. ADD A73 2 78; call42_previewdrop
-43. MLZ -1 0 1;
-44. MLZ -1 0 66;
-45. MLZ -1 0 3; beginDoWhile2_play_game
-46. ADD A78 1 71;
-47. MLZ -1 A72 A71;
-48. MLZ -1 A78 2;
-49. MLZ -1 A2 72;
-50. MLZ -1 52 A72;
-51. MLZ -1 244 0;
-52. ADD A72 2 78; call41_newpreview beginDoWhile3_single_piece
-53. ADD A78 1 71;
-54. MLZ -1 A76 A71;
-55. MLZ -1 A78 2;
-56. MLZ -1 A2 76;
-57. MLZ -1 59 A76;
-58. MLZ -1 401 0;
-59. ADD A76 2 78; call40_updatepos
-60. ADD A78 1 71;
-61. MLZ -1 A74 A71;
-62. MLZ -1 A78 2;
-63. MLZ -1 A2 74;
-64. MLZ -1 66 A74;
-65. MLZ -1 365 0;
-66. ADD A74 2 78; call39_printfallingpiece
-67. ADD A1 -1 2;
+29. ADD A79 1 72;
+30. MLZ -1 A73 A72;
+31. MLZ -1 A79 2;
+32. MLZ -1 A2 73;
+33. MLZ -1 35 A73;
+34. MLZ -1 243 0;
+35. ADD A73 2 79; call43_newpreview
+36. ADD A79 1 72;
+37. MLZ -1 A74 A72;
+38. MLZ -1 A79 2;
+39. MLZ -1 A2 74;
+40. MLZ -1 42 A74;
+41. MLZ -1 348 0;
+42. ADD A74 2 79; call42_previewdrop
+43. MLZ -1 0 3; beginDoWhile2_play_game
+44. ADD A79 1 72;
+45. MLZ -1 A73 A72;
+46. MLZ -1 A79 2;
+47. MLZ -1 A2 73;
+48. MLZ -1 50 A73;
+49. MLZ -1 243 0;
+50. ADD A73 2 79; call41_newpreview beginDoWhile3_single_piece
+51. ADD A79 1 72;
+52. MLZ -1 A77 A72;
+53. MLZ -1 A79 2;
+54. MLZ -1 A2 77;
+55. MLZ -1 57 A77;
+56. MLZ -1 400 0;
+57. ADD A77 2 79; call40_updatepos
+58. ADD A79 1 72;
+59. MLZ -1 A75 A72;
+60. MLZ -1 A79 2;
+61. MLZ -1 A2 75;
+62. MLZ -1 64 A75;
+63. MLZ -1 364 0;
+64. ADD A75 2 79; call39_printfallingpiece
+65. MLZ -1 A1 33;
+66. MLZ -1 0 1;
+67. ADD A33 -1 2;
 68. MNZ A2 83 0; beginIf4_rotate_counterclockwise
 69. MLZ 0 0 0;
-70. SUB A43 A42 47;
-71. ADD A47 A38 47;
-72. SUB A37 A38 52;
-73. ADD A52 A43 52;
-74. MLZ -1 A38 48;
-75. MLZ -1 A43 53;
-76. SUB A43 A44 49;
-77. ADD A49 A38 49;
-78. SUB A39 A38 54;
-79. ADD A54 A43 54;
-80. SUB A43 A45 50;
-81. ADD A50 A38 50;
-82. SUB A40 A38 55;
-83. ADD A55 A43 55; endIf4_rotate_counterclockwise
-84. ADD A1 -2 2;
+70. SUB A44 A43 48;
+71. ADD A48 A39 48;
+72. SUB A38 A39 53;
+73. ADD A53 A44 53;
+74. MLZ -1 A39 49;
+75. MLZ -1 A44 54;
+76. SUB A44 A45 50;
+77. ADD A50 A39 50;
+78. SUB A40 A39 55;
+79. ADD A55 A44 55;
+80. SUB A44 A46 51;
+81. ADD A51 A39 51;
+82. SUB A41 A39 56;
+83. ADD A56 A44 56; endIf4_rotate_counterclockwise
+84. ADD A33 -2 2;
 85. MNZ A2 90 0; beginIf5_move_left
 86. MLZ 0 0 0;
-87. ADD A37 1 47;
-88. ADD A38 1 48;
-89. ADD A39 1 49;
-90. ADD A40 1 50; endIf5_move_left
-91. ADD A1 -4 2;
+87. ADD A38 1 48;
+88. ADD A39 1 49;
+89. ADD A40 1 50;
+90. ADD A41 1 51; endIf5_move_left
+91. ADD A33 -4 2;
 92. MNZ A2 97 0; beginIf6_soft_drop
 93. MLZ 0 0 0;
-94. ADD A42 1 52;
-95. ADD A43 1 53;
-96. ADD A44 1 54;
-97. ADD A45 1 55; endIf6_soft_drop
-98. ADD A1 -8 2;
+94. ADD A43 1 53;
+95. ADD A44 1 54;
+96. ADD A45 1 55;
+97. ADD A46 1 56; endIf6_soft_drop
+98. ADD A33 -8 2;
 99. MNZ A2 104 0; beginIf7_move_right
 100. MLZ 0 0 0;
-101. ADD A37 -1 47;
-102. ADD A38 -1 48;
-103. ADD A39 -1 49;
-104. ADD A40 -1 50; endIf7_move_right
-105. ADD A1 -16 2;
+101. ADD A38 -1 48;
+102. ADD A39 -1 49;
+103. ADD A40 -1 50;
+104. ADD A41 -1 51; endIf7_move_right
+105. ADD A33 -16 2;
 106. MNZ A2 121 0; beginIf8_rotate_clockwise
 107. MLZ 0 0 0;
-108. SUB A42 A43 47;
-109. ADD A47 A38 47;
-110. SUB A38 A37 52;
-111. ADD A52 A43 52;
-112. MLZ -1 A38 48;
-113. MLZ -1 A43 53;
-114. SUB A44 A43 49;
-115. ADD A49 A38 49;
-116. SUB A38 A39 54;
-117. ADD A54 A43 54;
-118. SUB A45 A43 50;
-119. ADD A50 A38 50;
-120. SUB A38 A40 55;
-121. ADD A55 A43 55; endIf8_rotate_clockwise
-122. XOR A34 A1 34;
-123. MNZ A34 125 0; beginIf9
+108. SUB A43 A44 48;
+109. ADD A48 A39 48;
+110. SUB A39 A38 53;
+111. ADD A53 A44 53;
+112. MLZ -1 A39 49;
+113. MLZ -1 A44 54;
+114. SUB A45 A44 50;
+115. ADD A50 A39 50;
+116. SUB A39 A40 55;
+117. ADD A55 A44 55;
+118. SUB A46 A44 51;
+119. ADD A51 A39 51;
+120. SUB A39 A41 56;
+121. ADD A56 A44 56; endIf8_rotate_clockwise
+122. XOR A35 A33 35;
+123. MNZ A35 125 0; beginIf9
 124. MLZ 0 0 0;
-125. MLZ -1 A1 34; endIf9
-126. MLZ -1 0 1;
-127. ADD A78 1 71;
-128. MLZ -1 A75 A71;
-129. MLZ -1 A78 2;
-130. MLZ -1 A2 75;
-131. MLZ -1 133 A75;
-132. MLZ -1 383 0;
-133. ADD A75 2 78; call38_unprintfallingpiece
-134. ADD A78 1 71;
-135. MLZ -1 A77 A71;
-136. MLZ -1 A78 2;
-137. MLZ -1 A2 77;
-138. MLZ -1 140 A77;
-139. MLZ -1 415 0;
-140. ADD A77 2 78; call37_testcollision
-141. MNZ A66 158 0; beginIf10_valid_move
-142. MLZ 0 0 0;
-143. ADD A78 1 71;
-144. MLZ -1 A76 A71;
-145. MLZ -1 A78 2;
-146. MLZ -1 A2 76;
-147. MLZ -1 149 A76;
-148. MLZ -1 401 0;
-149. ADD A76 2 78; call36_updatepos
-150. ADD A78 1 71;
-151. MLZ -1 A74 A71;
-152. MLZ -1 A78 2;
-153. MLZ -1 A2 74;
-154. MLZ -1 156 A74;
-155. MLZ -1 365 0;
-156. ADD A74 2 78; call35_printfallingpiece
-157. MLZ -1 174 0; beginElse11_invalid_move
-158. ADD A42 1 52; endIf10_valid_move
-159. ADD A78 1 71;
-160. MLZ -1 A74 A71;
-161. MLZ -1 A78 2;
-162. MLZ -1 A2 74;
-163. MLZ -1 165 A74;
-164. MLZ -1 365 0;
-165. ADD A74 2 78; call34_printfallingpiece
-166. MLZ -1 A37 47;
-167. MLZ -1 A42 52;
-168. MLZ -1 A38 48;
-169. MLZ -1 A43 53;
-170. MLZ -1 A39 49;
-171. MLZ -1 A44 54;
-172. MLZ -1 A40 50;
-173. MLZ -1 A45 55; endElse11_invalid_move
-174. ADD A42 1 52;
-175. ADD A43 1 53;
-176. ADD A44 1 54;
-177. ADD A45 1 55;
-178. ADD A78 1 71;
-179. MLZ -1 A75 A71;
-180. MLZ -1 A78 2;
-181. MLZ -1 A2 75;
-182. MLZ -1 184 A75;
-183. MLZ -1 383 0;
-184. ADD A75 2 78; call33_unprintfallingpiece
-185. ADD A78 1 71;
-186. MLZ -1 A77 A71;
-187. MLZ -1 A78 2;
-188. MLZ -1 A2 77;
-189. MLZ -1 191 A77;
-190. MLZ -1 415 0;
-191. ADD A77 2 78; call32_testcollision
-192. ADD A66 -1 2;
-193. MLZ A2 52 0;
-194. MLZ 0 0 0; endDoWhile3_single_piece
-195. ADD A78 1 71;
-196. MLZ -1 A74 A71;
-197. MLZ -1 A78 2;
-198. MLZ -1 A2 74;
-199. MLZ -1 201 A74;
-200. MLZ -1 365 0;
-201. ADD A74 2 78; call31_printfallingpiece
-202. MLZ -1 1 67;
-203. MLZ -1 21 68; beginDoWhile12_check_for_clears
-204. ADD A68 10 2;
-205. ADD B2 1 2;
-206. MNZ A2 219 0; beginIf13_clear_row
-207. MLZ 0 0 0;
-208. MLZ -1 A68 69;
-209. ADD A68 1 68;
-210. SL A67 1 67; beginDoWhile14_gravity
-211. ADD A69 -1 70;
-212. ADD A69 10 2;
-213. ADD A70 10 71;
-214. MLZ -1 B71 A2;
-215. ADD A69 -1 69;
-216. SUB 0 A69 2;
-217. MLZ A2 210 0;
-218. MLZ 0 0 0; endDoWhile14_gravity
-219. MLZ -1 57351 10; endIf13_clear_row
-220. ADD A68 -1 68;
-221. SUB 0 A68 2;
-222. MLZ A2 203 0;
-223. MLZ 0 0 0; endDoWhile12_check_for_clears
-224. SRL A67 1 67;
-225. ADD A67 A3 3;
-226. ADD A78 1 71;
-227. MLZ -1 A73 A71;
-228. MLZ -1 A78 2;
-229. MLZ -1 A2 73;
-230. MLZ -1 232 A73;
-231. MLZ -1 349 0;
-232. ADD A73 2 78; call30_previewdrop
-233. ADD A78 1 71;
-234. MLZ -1 A77 A71;
-235. MLZ -1 A78 2;
-236. MLZ -1 A2 77;
-237. MLZ -1 239 A77;
-238. MLZ -1 415 0;
-239. ADD A77 2 78; call29_testcollision
-240. ADD A66 -1 2;
-241. MLZ A2 45 0;
-242. MLZ 0 0 0; endDoWhile2_play_game
-243. MLZ -1 348 0;
-244. MLZ -1 363 0; beginSub15_newpreview beginDoWhile16_prng
-245. SL A34 1 35;
-246. XOR A35 A34 34;
-247. SRL A34 5 35;
-248. XOR A35 A34 34;
-249. SL A34 2 35;
-250. XOR A35 A34 34;
-251. AND A34 7 33;
-252. ADD A33 -1 2;
-253. MLZ A2 244 0;
-254. MLZ 0 0 0; endDoWhile16_prng
-255. ADD A33 -1 2;
-256. MNZ A2 265 0; beginIf17_z_tetromino
-257. MLZ 0 0 0;
-258. MLZ -1 6 57;
-259. MLZ -1 7 58;
-260. MLZ -1 7 59;
-261. MLZ -1 8 60;
-262. MLZ -1 2 62;
-263. MLZ -1 2 63;
-264. MLZ -1 1 64;
-265. MLZ -1 1 65; endIf17_z_tetromino
-266. ADD A33 -2 2;
-267. MNZ A2 276 0; beginIf18_s_tetromino
-268. MLZ 0 0 0;
-269. MLZ -1 6 57;
-270. MLZ -1 7 58;
-271. MLZ -1 7 59;
-272. MLZ -1 8 60;
-273. MLZ -1 1 62;
-274. MLZ -1 2 63;
-275. MLZ -1 1 64;
-276. MLZ -1 2 65; endIf18_s_tetromino
-277. ADD A33 -3 2;
-278. MNZ A2 287 0; beginIf19_o_tetromino
-279. MLZ 0 0 0;
-280. MLZ -1 7 57;
-281. MLZ -1 8 58;
-282. MLZ -1 7 59;
-283. MLZ -1 8 60;
-284. MLZ -1 1 62;
-285. MLZ -1 1 63;
-286. MLZ -1 2 64;
-287. MLZ -1 2 65; endIf19_o_tetromino
-288. ADD A33 -4 2;
-289. MNZ A2 298 0; beginIf20_i_tetromino
-290. MLZ 0 0 0;
-291. MLZ -1 6 57;
-292. MLZ -1 7 58;
-293. MLZ -1 8 59;
-294. MLZ -1 9 60;
-295. MLZ -1 1 62;
-296. MLZ -1 1 63;
-297. MLZ -1 1 64;
-298. MLZ -1 1 65; endIf20_i_tetromino
-299. ADD A33 -5 2;
-300. MNZ A2 309 0; beginIf21_l_tetromino
-301. MLZ 0 0 0;
-302. MLZ -1 6 57;
-303. MLZ -1 7 58;
-304. MLZ -1 8 59;
-305. MLZ -1 8 60;
-306. MLZ -1 1 62;
-307. MLZ -1 1 63;
-308. MLZ -1 1 64;
-309. MLZ -1 2 65; endIf21_l_tetromino
-310. ADD A33 -6 2;
-311. MNZ A2 320 0; beginIf22_j_tetromino
-312. MLZ 0 0 0;
-313. MLZ -1 8 57;
-314. MLZ -1 7 58;
-315. MLZ -1 6 59;
-316. MLZ -1 6 60;
-317. MLZ -1 1 62;
-318. MLZ -1 1 63;
-319. MLZ -1 1 64;
-320. MLZ -1 2 65; endIf22_j_tetromino
-321. ADD A33 -7 2;
-322. MNZ A2 331 0; beginIf23_t_tetromino
-323. MLZ 0 0 0;
-324. MLZ -1 6 57;
-325. MLZ -1 7 58;
-326. MLZ -1 7 59;
-327. MLZ -1 8 60;
-328. MLZ -1 1 62;
-329. MLZ -1 1 63;
-330. MLZ -1 2 64;
-331. MLZ -1 1 65; endIf23_t_tetromino
-332. SL 1 A57 35;
-333. ADD A62 5 2;
-334. OR B2 A35 A2;
-335. SL 1 A58 35;
-336. ADD A63 5 2;
-337. OR B2 A35 A2;
-338. SL 1 A59 35;
-339. ADD A64 5 2;
-340. OR B2 A35 A2;
-341. SL 1 A60 35;
-342. ADD A65 5 2;
-343. OR B2 A35 A2;
-344. MLZ -1 A72 78;
-345. ADD A72 1 2;
-346. MLZ -1 B72 0;
-347. MLZ -1 B2 72; endSub15_newpreview
-348. MLZ -1 364 0;
-349. MLZ -1 381 0; beginSub24_previewdrop
-350. MLZ -1 A57 47;
-351. MLZ -1 A58 48;
-352. MLZ -1 A59 49;
-353. MLZ -1 A60 50;
-354. MLZ -1 A62 52;
-355. MLZ -1 A63 53;
-356. MLZ -1 A64 54;
-357. MLZ -1 A65 55;
-358. MLZ -1 63519 6;
-359. MLZ -1 63519 7;
-360. MLZ -1 A73 78;
-361. ADD A73 1 2;
-362. MLZ -1 B73 0;
-363. MLZ -1 B2 73; endSub24_previewdrop
-364. MLZ -1 382 0;
-365. MLZ -1 399 0; beginSub25_printfallingpiece
-366. SL 1 A37 35;
-367. ADD A42 10 2;
-368. OR B2 A35 A2;
-369. SL 1 A38 35;
-370. ADD A43 10 2;
-371. OR B2 A35 A2;
-372. SL 1 A39 35;
-373. ADD A44 10 2;
-374. OR B2 A35 A2;
-375. SL 1 A40 35;
-376. ADD A45 10 2;
-377. OR B2 A35 A2;
-378. MLZ -1 A74 78;
-379. ADD A74 1 2;
-380. MLZ -1 B74 0;
-381. MLZ -1 B2 74; endSub25_printfallingpiece
-382. MLZ -1 400 0;
-383. MLZ -1 413 0; beginSub26_unprintfallingpiece
-384. SL 1 A37 35;
-385. ADD A42 10 2;
-386. ANT B2 A35 A2;
-387. SL 1 A38 35;
-388. ADD A43 10 2;
-389. ANT B2 A35 A2;
-390. SL 1 A39 35;
-391. ADD A44 10 2;
-392. ANT B2 A35 A2;
-393. SL 1 A40 35;
-394. ADD A45 10 2;
-395. ANT B2 A35 A2;
-396. MLZ -1 A75 78;
-397. ADD A75 1 2;
-398. MLZ -1 B75 0;
-399. MLZ -1 B2 75; endSub26_unprintfallingpiece
-400. MLZ -1 414 0;
-401. MLZ -1 431 0; beginSub27_updatepos
-402. MLZ -1 A47 37;
-403. MLZ -1 A52 42;
-404. MLZ -1 A48 38;
-405. MLZ -1 A53 43;
-406. MLZ -1 A49 39;
-407. MLZ -1 A54 44;
-408. MLZ -1 A50 40;
-409. MLZ -1 A55 45;
-410. MLZ -1 A76 78;
-411. ADD A76 1 2;
-412. MLZ -1 B76 0;
-413. MLZ -1 B2 76; endSub27_updatepos
-414. MLZ -1 431 0;
-415. MLZ 0 0 0; beginSub28_testcollision
-416. ADD A52 10 2;
-417. SRL B2 A47 66;
-418. ADD A53 10 2;
-419. SRL B2 A48 35;
-420. OR A66 A35 66;
-421. ADD A54 10 2;
-422. SRL B2 A49 35;
-423. OR A66 A35 66;
-424. ADD A55 10 2;
-425. SRL B2 A50 35;
-426. OR A66 A35 66;
-427. AND A66 1 66;
-428. MLZ -1 A77 78;
-429. ADD A77 1 2;
-430. MLZ -1 B77 0;
-431. MLZ -1 B2 77; endSub28_testcollision
+125. MLZ -1 A33 35; endIf9
+126. ADD A79 1 72;
+127. MLZ -1 A76 A72;
+128. MLZ -1 A79 2;
+129. MLZ -1 A2 76;
+130. MLZ -1 132 A76;
+131. MLZ -1 382 0;
+132. ADD A76 2 79; call38_unprintfallingpiece
+133. ADD A79 1 72;
+134. MLZ -1 A78 A72;
+135. MLZ -1 A79 2;
+136. MLZ -1 A2 78;
+137. MLZ -1 139 A78;
+138. MLZ -1 414 0;
+139. ADD A78 2 79; call37_testcollision
+140. MNZ A67 157 0; beginIf10_valid_move
+141. MLZ 0 0 0;
+142. ADD A79 1 72;
+143. MLZ -1 A77 A72;
+144. MLZ -1 A79 2;
+145. MLZ -1 A2 77;
+146. MLZ -1 148 A77;
+147. MLZ -1 400 0;
+148. ADD A77 2 79; call36_updatepos
+149. ADD A79 1 72;
+150. MLZ -1 A75 A72;
+151. MLZ -1 A79 2;
+152. MLZ -1 A2 75;
+153. MLZ -1 155 A75;
+154. MLZ -1 364 0;
+155. ADD A75 2 79; call35_printfallingpiece
+156. MLZ -1 173 0; beginElse11_invalid_move
+157. ADD A43 1 53; endIf10_valid_move
+158. ADD A79 1 72;
+159. MLZ -1 A75 A72;
+160. MLZ -1 A79 2;
+161. MLZ -1 A2 75;
+162. MLZ -1 164 A75;
+163. MLZ -1 364 0;
+164. ADD A75 2 79; call34_printfallingpiece
+165. MLZ -1 A38 48;
+166. MLZ -1 A43 53;
+167. MLZ -1 A39 49;
+168. MLZ -1 A44 54;
+169. MLZ -1 A40 50;
+170. MLZ -1 A45 55;
+171. MLZ -1 A41 51;
+172. MLZ -1 A46 56; endElse11_invalid_move
+173. ADD A43 1 53;
+174. ADD A44 1 54;
+175. ADD A45 1 55;
+176. ADD A46 1 56;
+177. ADD A79 1 72;
+178. MLZ -1 A76 A72;
+179. MLZ -1 A79 2;
+180. MLZ -1 A2 76;
+181. MLZ -1 183 A76;
+182. MLZ -1 382 0;
+183. ADD A76 2 79; call33_unprintfallingpiece
+184. ADD A79 1 72;
+185. MLZ -1 A78 A72;
+186. MLZ -1 A79 2;
+187. MLZ -1 A2 78;
+188. MLZ -1 190 A78;
+189. MLZ -1 414 0;
+190. ADD A78 2 79; call32_testcollision
+191. ADD A67 -1 2;
+192. MLZ A2 50 0;
+193. MLZ 0 0 0; endDoWhile3_single_piece
+194. ADD A79 1 72;
+195. MLZ -1 A75 A72;
+196. MLZ -1 A79 2;
+197. MLZ -1 A2 75;
+198. MLZ -1 200 A75;
+199. MLZ -1 364 0;
+200. ADD A75 2 79; call31_printfallingpiece
+201. MLZ -1 1 68;
+202. MLZ -1 21 69; beginDoWhile12_check_for_clears
+203. ADD A69 10 2;
+204. ADD B2 1 2;
+205. MNZ A2 218 0; beginIf13_clear_row
+206. MLZ 0 0 0;
+207. MLZ -1 A69 70;
+208. ADD A69 1 69;
+209. SL A68 1 68; beginDoWhile14_gravity
+210. ADD A70 -1 71;
+211. ADD A70 10 2;
+212. ADD A71 10 72;
+213. MLZ -1 B72 A2;
+214. ADD A70 -1 70;
+215. SUB 0 A70 2;
+216. MLZ A2 209 0;
+217. MLZ 0 0 0; endDoWhile14_gravity
+218. MLZ -1 57351 10; endIf13_clear_row
+219. ADD A69 -1 69;
+220. SUB 0 A69 2;
+221. MLZ A2 202 0;
+222. MLZ 0 0 0; endDoWhile12_check_for_clears
+223. SRL A68 1 68;
+224. ADD A68 A3 3;
+225. ADD A79 1 72;
+226. MLZ -1 A74 A72;
+227. MLZ -1 A79 2;
+228. MLZ -1 A2 74;
+229. MLZ -1 231 A74;
+230. MLZ -1 348 0;
+231. ADD A74 2 79; call30_previewdrop
+232. ADD A79 1 72;
+233. MLZ -1 A78 A72;
+234. MLZ -1 A79 2;
+235. MLZ -1 A2 78;
+236. MLZ -1 238 A78;
+237. MLZ -1 414 0;
+238. ADD A78 2 79; call29_testcollision
+239. ADD A67 -1 2;
+240. MLZ A2 43 0;
+241. MLZ 0 0 0; endDoWhile2_play_game
+242. MLZ -1 347 0;
+243. MLZ -1 362 0; beginSub15_newpreview beginDoWhile16_prng
+244. SL A35 1 36;
+245. XOR A36 A35 35;
+246. SRL A35 5 36;
+247. XOR A36 A35 35;
+248. SL A35 2 36;
+249. XOR A36 A35 35;
+250. AND A35 7 34;
+251. ADD A34 -1 2;
+252. MLZ A2 243 0;
+253. MLZ 0 0 0; endDoWhile16_prng
+254. ADD A34 -1 2;
+255. MNZ A2 264 0; beginIf17_z_tetromino
+256. MLZ 0 0 0;
+257. MLZ -1 6 58;
+258. MLZ -1 7 59;
+259. MLZ -1 7 60;
+260. MLZ -1 8 61;
+261. MLZ -1 2 63;
+262. MLZ -1 2 64;
+263. MLZ -1 1 65;
+264. MLZ -1 1 66; endIf17_z_tetromino
+265. ADD A34 -2 2;
+266. MNZ A2 275 0; beginIf18_s_tetromino
+267. MLZ 0 0 0;
+268. MLZ -1 6 58;
+269. MLZ -1 7 59;
+270. MLZ -1 7 60;
+271. MLZ -1 8 61;
+272. MLZ -1 1 63;
+273. MLZ -1 2 64;
+274. MLZ -1 1 65;
+275. MLZ -1 2 66; endIf18_s_tetromino
+276. ADD A34 -3 2;
+277. MNZ A2 286 0; beginIf19_o_tetromino
+278. MLZ 0 0 0;
+279. MLZ -1 7 58;
+280. MLZ -1 8 59;
+281. MLZ -1 7 60;
+282. MLZ -1 8 61;
+283. MLZ -1 1 63;
+284. MLZ -1 1 64;
+285. MLZ -1 2 65;
+286. MLZ -1 2 66; endIf19_o_tetromino
+287. ADD A34 -4 2;
+288. MNZ A2 297 0; beginIf20_i_tetromino
+289. MLZ 0 0 0;
+290. MLZ -1 6 58;
+291. MLZ -1 7 59;
+292. MLZ -1 8 60;
+293. MLZ -1 9 61;
+294. MLZ -1 1 63;
+295. MLZ -1 1 64;
+296. MLZ -1 1 65;
+297. MLZ -1 1 66; endIf20_i_tetromino
+298. ADD A34 -5 2;
+299. MNZ A2 308 0; beginIf21_l_tetromino
+300. MLZ 0 0 0;
+301. MLZ -1 6 58;
+302. MLZ -1 7 59;
+303. MLZ -1 8 60;
+304. MLZ -1 8 61;
+305. MLZ -1 1 63;
+306. MLZ -1 1 64;
+307. MLZ -1 1 65;
+308. MLZ -1 2 66; endIf21_l_tetromino
+309. ADD A34 -6 2;
+310. MNZ A2 319 0; beginIf22_j_tetromino
+311. MLZ 0 0 0;
+312. MLZ -1 8 58;
+313. MLZ -1 7 59;
+314. MLZ -1 6 60;
+315. MLZ -1 6 61;
+316. MLZ -1 1 63;
+317. MLZ -1 1 64;
+318. MLZ -1 1 65;
+319. MLZ -1 2 66; endIf22_j_tetromino
+320. ADD A34 -7 2;
+321. MNZ A2 330 0; beginIf23_t_tetromino
+322. MLZ 0 0 0;
+323. MLZ -1 6 58;
+324. MLZ -1 7 59;
+325. MLZ -1 7 60;
+326. MLZ -1 8 61;
+327. MLZ -1 1 63;
+328. MLZ -1 1 64;
+329. MLZ -1 2 65;
+330. MLZ -1 1 66; endIf23_t_tetromino
+331. SL 1 A58 36;
+332. ADD A63 5 2;
+333. OR B2 A36 A2;
+334. SL 1 A59 36;
+335. ADD A64 5 2;
+336. OR B2 A36 A2;
+337. SL 1 A60 36;
+338. ADD A65 5 2;
+339. OR B2 A36 A2;
+340. SL 1 A61 36;
+341. ADD A66 5 2;
+342. OR B2 A36 A2;
+343. MLZ -1 A73 79;
+344. ADD A73 1 2;
+345. MLZ -1 B73 0;
+346. MLZ -1 B2 73; endSub15_newpreview
+347. MLZ -1 363 0;
+348. MLZ -1 380 0; beginSub24_previewdrop
+349. MLZ -1 A58 48;
+350. MLZ -1 A59 49;
+351. MLZ -1 A60 50;
+352. MLZ -1 A61 51;
+353. MLZ -1 A63 53;
+354. MLZ -1 A64 54;
+355. MLZ -1 A65 55;
+356. MLZ -1 A66 56;
+357. MLZ -1 63519 6;
+358. MLZ -1 63519 7;
+359. MLZ -1 A74 79;
+360. ADD A74 1 2;
+361. MLZ -1 B74 0;
+362. MLZ -1 B2 74; endSub24_previewdrop
+363. MLZ -1 381 0;
+364. MLZ -1 398 0; beginSub25_printfallingpiece
+365. SL 1 A38 36;
+366. ADD A43 10 2;
+367. OR B2 A36 A2;
+368. SL 1 A39 36;
+369. ADD A44 10 2;
+370. OR B2 A36 A2;
+371. SL 1 A40 36;
+372. ADD A45 10 2;
+373. OR B2 A36 A2;
+374. SL 1 A41 36;
+375. ADD A46 10 2;
+376. OR B2 A36 A2;
+377. MLZ -1 A75 79;
+378. ADD A75 1 2;
+379. MLZ -1 B75 0;
+380. MLZ -1 B2 75; endSub25_printfallingpiece
+381. MLZ -1 399 0;
+382. MLZ -1 412 0; beginSub26_unprintfallingpiece
+383. SL 1 A38 36;
+384. ADD A43 10 2;
+385. ANT B2 A36 A2;
+386. SL 1 A39 36;
+387. ADD A44 10 2;
+388. ANT B2 A36 A2;
+389. SL 1 A40 36;
+390. ADD A45 10 2;
+391. ANT B2 A36 A2;
+392. SL 1 A41 36;
+393. ADD A46 10 2;
+394. ANT B2 A36 A2;
+395. MLZ -1 A76 79;
+396. ADD A76 1 2;
+397. MLZ -1 B76 0;
+398. MLZ -1 B2 76; endSub26_unprintfallingpiece
+399. MLZ -1 413 0;
+400. MLZ -1 430 0; beginSub27_updatepos
+401. MLZ -1 A48 38;
+402. MLZ -1 A53 43;
+403. MLZ -1 A49 39;
+404. MLZ -1 A54 44;
+405. MLZ -1 A50 40;
+406. MLZ -1 A55 45;
+407. MLZ -1 A51 41;
+408. MLZ -1 A56 46;
+409. MLZ -1 A77 79;
+410. ADD A77 1 2;
+411. MLZ -1 B77 0;
+412. MLZ -1 B2 77; endSub27_updatepos
+413. MLZ -1 430 0;
+414. MLZ 0 0 0; beginSub28_testcollision
+415. ADD A53 10 2;
+416. SRL B2 A48 67;
+417. ADD A54 10 2;
+418. SRL B2 A49 36;
+419. OR A67 A36 67;
+420. ADD A55 10 2;
+421. SRL B2 A50 36;
+422. OR A67 A36 67;
+423. ADD A56 10 2;
+424. SRL B2 A51 36;
+425. OR A67 A36 67;
+426. AND A67 1 67;
+427. MLZ -1 A78 79;
+428. ADD A78 1 2;
+429. MLZ -1 B78 0;
+430. MLZ -1 B2 78; endSub28_testcollision
