@@ -1,6 +1,7 @@
 my score[0]; # awkward hack to make the display look nicer
 my preview[4];
 my board[23];
+my input;
 
 my randval;
 my rand = 1;
@@ -38,8 +39,6 @@ board[22] = 65535;
 call newpreview();
 call previewdrop();
 
-display = 0;
-collision = 0;
 score = 0;
 
 do play game {
@@ -47,8 +46,9 @@ do play game {
   do single piece {
     call updatepos();
     call printfallingpiece();
-    
-    if (display == 1) rotate counterclockwise {
+    input = display;
+    display = 0;
+    if (input == 1) rotate counterclockwise {
       xt[0] = y[1] - y[0];
       xt[0] += x[1];
       yt[0] = x[0] - x[1];
@@ -64,25 +64,25 @@ do play game {
       yt[3] = x[3] - x[1];
       yt[3] += y[1];
     }
-    if (display == 2) move left {
+    if (input == 2) move left {
       xt[0] = x[0] + 1;
       xt[1] = x[1] + 1;
       xt[2] = x[2] + 1;
       xt[3] = x[3] + 1;
     }
-    if (display == 4) soft drop {
+    if (input == 4) soft drop {
       yt[0] = y[0] + 1;
       yt[1] = y[1] + 1;
       yt[2] = y[2] + 1;
       yt[3] = y[3] + 1;
     }
-    if (display == 8) move right {
+    if (input == 8) move right {
       xt[0] = x[0] - 1;
       xt[1] = x[1] - 1;
       xt[2] = x[2] - 1;
       xt[3] = x[3] - 1;
     }
-    if (display == 16) rotate clockwise {
+    if (input == 16) rotate clockwise {
       xt[0] = y[0] - y[1];
       xt[0] += x[1];
       yt[0] = x[1] - x[0];
@@ -98,11 +98,10 @@ do play game {
       yt[3] = x[1] - x[3];
       yt[3] += y[1];
     }
-    rand ^= display; # inject randomness
+    rand ^= input; # inject randomness
     if (rand == 0) { # prevent prng bug
-      rand = display;
+      rand = input;
     }
-    display = 0;
   
     call unprintfallingpiece();
     call testcollision();
