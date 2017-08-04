@@ -7,12 +7,30 @@ my randval;
 my rand = 1;
 my shifted;
 
-my x[4];  # current piece location 
-my y[4];
-my xt[4]; # transposed piece location
-my yt[4];
-my px[4]; # preview piece location
-my py[4];
+my x0;  # current piece location
+my x1;
+my x2;
+my x3;
+my y0;
+my y1;
+my y2;
+my y3;
+my xt0;  # transposed piece location
+my xt1;
+my xt2;
+my xt3;
+my yt0;
+my yt1;
+my yt2;
+my yt3;
+my px0;  # preview piece location
+my px1;
+my px2;
+my px3;
+my py0;
+my py1;
+my py2;
+my py3;
 
 my collision;
 my piecescore;
@@ -22,109 +40,179 @@ my j;
 my k;
 
 # new game
+score = 0;
 score[0] = 65535;
-i = 0;
-do clear preview {
-  preview[i] = 63519;
-  i++;
-} while (i < 4);
+preview[0] = 63519;
+preview[1] = 63519;
+preview[2] = 63519;
+preview[3] = 63519;
 preview[4] = 65535;
-i = 0;
 do clear board {
-  board[i] = 57351;
-  i++;
-} while (i < 22);
+  board[j] = 57351;
+  j++;
+} while (j < 22);
 board[22] = 65535;
 
 call newpreview();
-call previewdrop();
-
-score = 0;
+xt0 = px0;
+xt1 = px1;
+xt2 = px2;
+xt3 = px3;
+yt0 = py0;
+yt1 = py1;
+yt2 = py2;
+yt3 = py3;
 
 do play game {
+  preview[1] = 63519;
+  preview[2] = 63519;
+  
   call newpreview();
+  
   do single piece {
-    call updatepos();
-    call printfallingpiece();
+    x0 = xt0;
+    y0 = yt0;
+    x1 = xt1;
+    y1 = yt1;
+    x2 = xt2;
+    y2 = yt2;
+    x3 = xt3;
+    y3 = yt3;
+    shifted = 1 << x0;
+    board[y0] |= shifted;
+    shifted = 1 << x1;
+    board[y1] |= shifted;
+    shifted = 1 << x2;
+    board[y2] |= shifted;
+    shifted = 1 << x3;
+    board[y3] |= shifted;
     input = display;
     display = 0;
     if (input == 1) rotate counterclockwise {
-      xt[0] = y[1] - y[0];
-      xt[0] += x[1];
-      yt[0] = x[0] - x[1];
-      yt[0] += y[1];
-      xt[1] = x[1];
-      yt[1] = y[1];
-      xt[2] = y[1] - y[2];
-      xt[2] += x[1];
-      yt[2] = x[2] - x[1];
-      yt[2] += y[1];
-      xt[3] = y[1] - y[3];
-      xt[3] += x[1];
-      yt[3] = x[3] - x[1];
-      yt[3] += y[1];
+      xt0 = y1 - y0;
+      xt0 += x1;
+      yt0 = x0 - x1;
+      yt0 += y1;
+      xt1 = x1;
+      yt1 = y1;
+      xt2 = y1 - y2;
+      xt2 += x1;
+      yt2 = x2 - x1;
+      yt2 += y1;
+      xt3 = y1 - y3;
+      xt3 += x1;
+      yt3 = x3 - x1;
+      yt3 += y1;
     }
     if (input == 2) move left {
-      xt[0] = x[0] + 1;
-      xt[1] = x[1] + 1;
-      xt[2] = x[2] + 1;
-      xt[3] = x[3] + 1;
+      xt0 = x0 + 1;
+      xt1 = x1 + 1;
+      xt2 = x2 + 1;
+      xt3 = x3 + 1;
     }
     if (input == 4) soft drop {
-      yt[0] = y[0] + 1;
-      yt[1] = y[1] + 1;
-      yt[2] = y[2] + 1;
-      yt[3] = y[3] + 1;
+      yt0 = y0 + 1;
+      yt1 = y1 + 1;
+      yt2 = y2 + 1;
+      yt3 = y3 + 1;
     }
     if (input == 8) move right {
-      xt[0] = x[0] - 1;
-      xt[1] = x[1] - 1;
-      xt[2] = x[2] - 1;
-      xt[3] = x[3] - 1;
+      xt0 = x0 - 1;
+      xt1 = x1 - 1;
+      xt2 = x2 - 1;
+      xt3 = x3 - 1;
     }
     if (input == 16) rotate clockwise {
-      xt[0] = y[0] - y[1];
-      xt[0] += x[1];
-      yt[0] = x[1] - x[0];
-      yt[0] += y[1];
-      xt[1] = x[1];
-      yt[1] = y[1];
-      xt[2] = y[2] - y[1];
-      xt[2] += x[1];
-      yt[2] = x[1] - x[2];
-      yt[2] += y[1];
-      xt[3] = y[3] - y[1];
-      xt[3] += x[1];
-      yt[3] = x[1] - x[3];
-      yt[3] += y[1];
+      xt0 = y0 - y1;
+      xt0 += x1;
+      yt0 = x1 - x0;
+      yt0 += y1;
+      xt1 = x1;
+      yt1 = y1;
+      xt2 = y2 - y1;
+      xt2 += x1;
+      yt2 = x1 - x2;
+      yt2 += y1;
+      xt3 = y3 - y1;
+      xt3 += x1;
+      yt3 = x1 - x3;
+      yt3 += y1;
     }
     rand ^= input; # inject randomness
-    if (rand == 0) { # prevent prng bug
-      rand = input;
+    if (rand == 0) {
+      rand = input; # prevent prng bug
     }
   
-    call unprintfallingpiece();
-    call testcollision();
+    shifted = 1 << x0;
+    board[y0] &!= shifted;
+    shifted = 1 << x1;
+    board[y1] &!= shifted;
+    shifted = 1 << x2;
+    board[y2] &!= shifted;
+    shifted = 1 << x3;
+    board[y3] &!= shifted;
+    
+    collision = board[yt0] >>> xt0;
+    shifted = board[yt1] >>> xt1;
+    collision |= shifted;
+    shifted = board[yt2] >>> xt2;
+    collision |= shifted;
+    shifted = board[yt3] >>> xt3;
+    collision |= shifted;
+    collision &= 1;
+  
     if (collision == 0) valid move {
-      call updatepos();
-      call printfallingpiece();
+      x0 = xt0;
+      y0 = yt0;
+      x1 = xt1;
+      y1 = yt1;
+      x2 = xt2;
+      y2 = yt2;
+      x3 = xt3;
+      y3 = yt3;
     } else invalid move {
-      call printfallingpiece();
-      xt[0] = x[0];
-      yt[0] = y[0];
-      xt[1] = x[1];
-      yt[1] = y[1];
-      xt[2] = x[2];
-      yt[2] = y[2];
-      xt[3] = x[3];
-      yt[3] = y[3];
+      xt0 = x0;
+      yt0 = y0;
+      xt1 = x1;
+      yt1 = y1;
+      xt2 = x2;
+      yt2 = y2;
+      xt3 = x3;
+      yt3 = y3;
     }
-    yt[0] = y[0] + 1;
-    yt[1] = y[1] + 1;
-    yt[2] = y[2] + 1;
-    yt[3] = y[3] + 1;
-    call unprintfallingpiece();
-    call testcollision();
+    
+    shifted = 1 << x0;
+    board[y0] |= shifted;
+    shifted = 1 << x1;
+    board[y1] |= shifted;
+    shifted = 1 << x2;
+    board[y2] |= shifted;
+    shifted = 1 << x3;
+    board[y3] |= shifted;
+    
+    yt0 = y0 + 1;
+    yt1 = y1 + 1;
+    yt2 = y2 + 1;
+    yt3 = y3 + 1;
+    
+    shifted = 1 << x0;
+    board[y0] &!= shifted;
+    shifted = 1 << x1;
+    board[y1] &!= shifted;
+    shifted = 1 << x2;
+    board[y2] &!= shifted;
+    shifted = 1 << x3;
+    board[y3] &!= shifted;
+    
+    collision = board[yt0] >>> xt0;
+    shifted = board[yt1] >>> xt1;
+    collision |= shifted;
+    shifted = board[yt2] >>> xt2;
+    collision |= shifted;
+    shifted = board[yt3] >>> xt3;
+    collision |= shifted;
+    collision &= 1;
+    
   } while (collision < 1);
   call printfallingpiece();
   
@@ -147,8 +235,24 @@ do play game {
   piecescore >>>= 1;
   score += piecescore;
   
-  call previewdrop();
-  call testcollision();
+  xt0 = px0;
+  xt1 = px1;
+  xt2 = px2;
+  xt3 = px3;
+  yt0 = py0;
+  yt1 = py1;
+  yt2 = py2;
+  yt3 = py3;
+  
+  collision = board[yt0] >>> xt0;
+  shifted = board[yt1] >>> xt1;
+  collision |= shifted;
+  shifted = board[yt2] >>> xt2;
+  collision |= shifted;
+  shifted = board[yt3] >>> xt3;
+  collision |= shifted;
+  collision &= 1;
+  
 } while (collision < 1);
 
 sub newpreview() {
@@ -162,138 +266,81 @@ sub newpreview() {
     randval = rand & 7;
   } while (randval < 1);
   if (randval == 1) Z tetromino {
-    px[0] = 6;
-    px[1] = 7;
-    px[2] = 7;
-    px[3] = 8;
-    py[0] = 2;
-    py[1] = 2;
-    py[2] = 1;
-    py[3] = 1;
+    px0 = 6;
+    px1 = 7;
+    px2 = 7;
+    px3 = 8;
+    py0 = 2;
+    py1 = 2;
+    py2 = 1;
+    py3 = 1;
   }
   if (randval == 2) S tetromino {
-    px[0] = 6;
-    px[1] = 7;
-    px[2] = 7;
-    px[3] = 8;
-    py[0] = 1;
-    py[1] = 2;
-    py[2] = 1;
-    py[3] = 2;
+    px0 = 6;
+    px1 = 7;
+    px2 = 7;
+    px3 = 8;
+    py0 = 1;
+    py1 = 2;
+    py2 = 1;
+    py3 = 2;
   }
   if (randval == 3) O tetromino{
-    px[0] = 7;
-    px[1] = 8;
-    px[2] = 7;
-    px[3] = 8;
-    py[0] = 1;
-    py[1] = 1;
-    py[2] = 2;
-    py[3] = 2;
+    px0 = 7;
+    px1 = 8;
+    px2 = 7;
+    px3 = 8;
+    py0 = 1;
+    py1 = 1;
+    py2 = 2;
+    py3 = 2;
   }
   if (randval == 4) I tetromino {
-    px[0] = 6;
-    px[1] = 7;
-    px[2] = 8;
-    px[3] = 9;
-    py[0] = 1;
-    py[1] = 1;
-    py[2] = 1;
-    py[3] = 1;
+    px0 = 6;
+    px1 = 7;
+    px2 = 8;
+    px3 = 9;
+    py0 = 1;
+    py1 = 1;
+    py2 = 1;
+    py3 = 1;
   }
   if (randval == 5) L tetromino {
-    px[0] = 6;
-    px[1] = 7;
-    px[2] = 8;
-    px[3] = 8;
-    py[0] = 1;
-    py[1] = 1;
-    py[2] = 1;
-    py[3] = 2;
+    px0 = 6;
+    px1 = 7;
+    px2 = 8;
+    px3 = 8;
+    py0 = 1;
+    py1 = 1;
+    py2 = 1;
+    py3 = 2;
   }
   if (randval == 6) J tetromino {
-    px[0] = 8;
-    px[1] = 7;
-    px[2] = 6;
-    px[3] = 6;
-    py[0] = 1;
-    py[1] = 1;
-    py[2] = 1;
-    py[3] = 2;
+    px0 = 8;
+    px1 = 7;
+    px2 = 6;
+    px3 = 6;
+    py0 = 1;
+    py1 = 1;
+    py2 = 1;
+    py3 = 2;
   }
   if (randval == 7) T tetromino {
-    px[0] = 6;
-    px[1] = 7;
-    px[2] = 7;
-    px[3] = 8;
-    py[0] = 1;
-    py[1] = 1;
-    py[2] = 2;
-    py[3] = 1;
+    px0 = 6;
+    px1 = 7;
+    px2 = 7;
+    px3 = 8;
+    py0 = 1;
+    py1 = 1;
+    py2 = 2;
+    py3 = 1;
   }
-  shifted = 1 << px[0];
-  preview[py[0]] |= shifted;
-  shifted = 1 << px[1];
-  preview[py[1]] |= shifted;
-  shifted = 1 << px[2];
-  preview[py[2]] |= shifted;
-  shifted = 1 << px[3];
-  preview[py[3]] |= shifted;
-}
-
-sub previewdrop() {
-  xt[0] = px[0];
-  xt[1] = px[1];
-  xt[2] = px[2];
-  xt[3] = px[3];
-  yt[0] = py[0];
-  yt[1] = py[1];
-  yt[2] = py[2];
-  yt[3] = py[3];
-  preview[1] = 63519;
-  preview[2] = 63519;
-}
-
-sub printfallingpiece() {
-  shifted = 1 << x[0];
-  board[y[0]] |= shifted;
-  shifted = 1 << x[1];
-  board[y[1]] |= shifted;
-  shifted = 1 << x[2];
-  board[y[2]] |= shifted;
-  shifted = 1 << x[3];
-  board[y[3]] |= shifted;
-}
-
-sub unprintfallingpiece() {
-  shifted = 1 << x[0];
-  board[y[0]] &!= shifted;
-  shifted = 1 << x[1];
-  board[y[1]] &!= shifted;
-  shifted = 1 << x[2];
-  board[y[2]] &!= shifted;
-  shifted = 1 << x[3];
-  board[y[3]] &!= shifted;
-}
-
-sub updatepos() {
-  x[0] = xt[0];
-  y[0] = yt[0];
-  x[1] = xt[1];
-  y[1] = yt[1];
-  x[2] = xt[2];
-  y[2] = yt[2];
-  x[3] = xt[3];
-  y[3] = yt[3];
-}
-
-sub testcollision() {
-  collision = board[yt[0]] >>> xt[0];
-  shifted = board[yt[1]] >>> xt[1];
-  collision |= shifted;
-  shifted = board[yt[2]] >>> xt[2];
-  collision |= shifted;
-  shifted = board[yt[3]] >>> xt[3];
-  collision |= shifted;
-  collision &= 1;
+  shifted = 1 << px0;
+  preview[py0] |= shifted;
+  shifted = 1 << px1;
+  preview[py1] |= shifted;
+  shifted = 1 << px2;
+  preview[py2] |= shifted;
+  shifted = 1 << px3;
+  preview[py3] |= shifted;
 }
