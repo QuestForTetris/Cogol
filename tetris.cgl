@@ -2,6 +2,7 @@ my score[0]; # awkward hack to make the display look nicer
 my preview[4];
 my board[23];
 my input;
+my playerturn;
 
 my randval;
 my rand = 1;
@@ -54,16 +55,16 @@ do clear board {
 board[22] = 65535;
 
 call newpreview();
-xt0 = px0;
-xt1 = px1;
-xt2 = px2;
-xt3 = px3;
-yt0 = py0;
-yt1 = py1;
-yt2 = py2;
-yt3 = py3;
 
 do play game {
+  xt0 = px0;
+  xt1 = px1;
+  xt2 = px2;
+  xt3 = px3;
+  yt0 = py0;
+  yt1 = py1;
+  yt2 = py2;
+  yt3 = py3;
   preview[1] = 63519;
   preview[2] = 63519;
   
@@ -86,8 +87,11 @@ do play game {
     board[y2] |= shifted;
     shifted = 1 << x3;
     board[y3] |= shifted;
-    input = display;
-    display = 0;
+    playerturn = 1 &! playerturn;
+    if (playerturn == 1) {
+      input = display;
+      display = 0;
+    }
     if (input == 1) rotate counterclockwise {
       xt0 = y1 - y0;
       xt0 += x1;
@@ -111,10 +115,7 @@ do play game {
       xt3 = x3 + 1;
     }
     if (input == 4) soft drop {
-      yt0 = y0 + 1;
-      yt1 = y1 + 1;
-      yt2 = y2 + 1;
-      yt3 = y3 + 1;
+      playerturn = 0;
     }
     if (input == 8) move right {
       xt0 = x0 - 1;
@@ -142,6 +143,13 @@ do play game {
     if (rand == 0) {
       rand = input; # prevent prng bug
     }
+    input = 0;
+    if (playerturn == 0) gravity {
+      yt0 = y0 + 1;
+      yt1 = y1 + 1;
+      yt2 = y2 + 1;
+      yt3 = y3 + 1;
+    }
   
     shifted = 1 << x0;
     board[y0] &!= shifted;
@@ -161,16 +169,7 @@ do play game {
     collision |= shifted;
     collision &= 1;
   
-    if (collision == 0) valid move {
-      x0 = xt0;
-      y0 = yt0;
-      x1 = xt1;
-      y1 = yt1;
-      x2 = xt2;
-      y2 = yt2;
-      x3 = xt3;
-      y3 = yt3;
-    } else invalid move {
+    if (collision == 1) invalid move {
       xt0 = x0;
       yt0 = y0;
       xt1 = x1;
@@ -181,40 +180,18 @@ do play game {
       yt3 = y3;
     }
     
-    shifted = 1 << x0;
-    board[y0] |= shifted;
-    shifted = 1 << x1;
-    board[y1] |= shifted;
-    shifted = 1 << x2;
-    board[y2] |= shifted;
-    shifted = 1 << x3;
-    board[y3] |= shifted;
-    
-    yt0 = y0 + 1;
-    yt1 = y1 + 1;
-    yt2 = y2 + 1;
-    yt3 = y3 + 1;
-    
-    shifted = 1 << x0;
-    board[y0] &!= shifted;
-    shifted = 1 << x1;
-    board[y1] &!= shifted;
-    shifted = 1 << x2;
-    board[y2] &!= shifted;
-    shifted = 1 << x3;
-    board[y3] &!= shifted;
-    
-    collision = board[yt0] >>> xt0;
-    shifted = board[yt1] >>> xt1;
-    collision |= shifted;
-    shifted = board[yt2] >>> xt2;
-    collision |= shifted;
-    shifted = board[yt3] >>> xt3;
-    collision |= shifted;
-    collision &= 1;
+    collision &!= playerturn;
     
   } while (collision < 1);
-  call printfallingpiece();
+  
+  shifted = 1 << x0;
+  board[y0] |= shifted;
+  shifted = 1 << x1;
+  board[y1] |= shifted;
+  shifted = 1 << x2;
+  board[y2] |= shifted;
+  shifted = 1 << x3;
+  board[y3] |= shifted;
   
   piecescore = 1;
   i = 21;
@@ -235,21 +212,12 @@ do play game {
   piecescore >>>= 1;
   score += piecescore;
   
-  xt0 = px0;
-  xt1 = px1;
-  xt2 = px2;
-  xt3 = px3;
-  yt0 = py0;
-  yt1 = py1;
-  yt2 = py2;
-  yt3 = py3;
-  
-  collision = board[yt0] >>> xt0;
-  shifted = board[yt1] >>> xt1;
+  collision = board[py0] >>> px0;
+  shifted = board[py1] >>> px1;
   collision |= shifted;
-  shifted = board[yt2] >>> xt2;
+  shifted = board[py2] >>> px2;
   collision |= shifted;
-  shifted = board[yt3] >>> xt3;
+  shifted = board[py3] >>> px3;
   collision |= shifted;
   collision &= 1;
   
@@ -265,73 +233,42 @@ sub newpreview() {
     rand ^= shifted;
     randval = rand & 7;
   } while (randval < 1);
+  
+  px0 = 6; # reduce duplication
+  px1 = 7;
+  px2 = 7;
+  px3 = 8;
+  py0 = 1;
+  py1 = 1;
+  py2 = 1;
+  py3 = 2;
   if (randval == 1) Z tetromino {
-    px0 = 6;
-    px1 = 7;
-    px2 = 7;
-    px3 = 8;
     py0 = 2;
     py1 = 2;
-    py2 = 1;
     py3 = 1;
   }
   if (randval == 2) S tetromino {
-    px0 = 6;
-    px1 = 7;
-    px2 = 7;
-    px3 = 8;
-    py0 = 1;
     py1 = 2;
     py2 = 1;
-    py3 = 2;
   }
   if (randval == 3) O tetromino{
     px0 = 7;
     px1 = 8;
-    px2 = 7;
-    px3 = 8;
-    py0 = 1;
-    py1 = 1;
     py2 = 2;
-    py3 = 2;
   }
   if (randval == 4) I tetromino {
-    px0 = 6;
-    px1 = 7;
-    px2 = 8;
-    px3 = 9;
-    py0 = 1;
-    py1 = 1;
-    py2 = 1;
+    px2 = 9;
     py3 = 1;
   }
   if (randval == 5) L tetromino {
-    px0 = 6;
-    px1 = 7;
     px2 = 8;
-    px3 = 8;
-    py0 = 1;
-    py1 = 1;
-    py2 = 1;
-    py3 = 2;
   }
   if (randval == 6) J tetromino {
     px0 = 8;
-    px1 = 7;
     px2 = 6;
     px3 = 6;
-    py0 = 1;
-    py1 = 1;
-    py2 = 1;
-    py3 = 2;
   }
   if (randval == 7) T tetromino {
-    px0 = 6;
-    px1 = 7;
-    px2 = 7;
-    px3 = 8;
-    py0 = 1;
-    py1 = 1;
     py2 = 2;
     py3 = 1;
   }
