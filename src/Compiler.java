@@ -21,7 +21,7 @@ public class Compiler {
    * @throws FileNotFoundException
    */
   public static void main(String[] args) throws FileNotFoundException {
-    String sourcefile = "primes.cgl";
+    String sourcefile = "source4.cgl";
     if (args.length > 0) {
       sourcefile = args[0];
     }
@@ -611,9 +611,11 @@ public class Compiler {
           test = testdest.dup();
           test.mode++;
           if (op.endsWith("=")) {
-            cond.add(new Command("ADD", arg2, new Arg(1), testdest));
+            ROM.add(new Command("ADD", arg2, new Arg(1), testdest));
+            ROM.add(new Command("SUB", arg1, test, testdest));
+          } else {
+            ROM.add(new Command("SUB", arg1, arg2, testdest));
           }
-          cond.add(new Command("SUB", arg1, arg2, testdest));
         }
         cond.add(new Command("MLZ", test, new Arg("begin" + loop, 2),
             new Arg(address.get(ProgramCounter))));
@@ -805,8 +807,10 @@ public class Compiler {
           test.mode++;
           if (op.endsWith("=")) {
             ROM.add(new Command("ADD", arg2, new Arg(1), testdest));
+            ROM.add(new Command("SUB", arg1, test, testdest));
+          } else {
+            ROM.add(new Command("SUB", arg1, arg2, testdest));
           }
-          ROM.add(new Command("SUB", arg1, arg2, testdest));
         }
         ROM.add(new Command("MLZ", test, new Arg("begin" + loop, 1),
             new Arg(address.get(ProgramCounter))));
