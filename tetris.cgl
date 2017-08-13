@@ -71,14 +71,16 @@ do play game {
   call newpreview();
   
   do single piece {
-    x0 = xt0;
-    y0 = yt0;
-    x1 = xt1;
-    y1 = yt1;
-    x2 = xt2;
-    y2 = yt2;
-    x3 = xt3;
-    y3 = yt3;
+    if (collision == 0) update position {
+      x0 = xt0;
+      y0 = yt0;
+      x1 = xt1;
+      y1 = yt1;
+      x2 = xt2;
+      y2 = yt2;
+      x3 = xt3;
+      y3 = yt3;
+    }
     shifted = 1 << x0;
     board[y0] |= shifted;
     shifted = 1 << x1;
@@ -168,21 +170,8 @@ do play game {
     shifted = board[yt3] >>> xt3;
     collision |= shifted;
     collision &= 1;
-  
-    if (collision == 1) invalid move {
-      xt0 = x0;
-      yt0 = y0;
-      xt1 = x1;
-      yt1 = y1;
-      xt2 = x2;
-      yt2 = y2;
-      xt3 = x3;
-      yt3 = y3;
-    }
     
-    collision &!= playerturn;
-    
-  } while (collision < 1);
+  } while (collision <= playerturn);
   
   shifted = 1 << x0;
   board[y0] |= shifted;
