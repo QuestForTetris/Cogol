@@ -21,12 +21,12 @@ public class Compiler {
    * @throws FileNotFoundException
    */
   public static void main(String[] args) throws FileNotFoundException {
-    String sourcefile = "source4.cgl";
+    String sourcefile = "tetris.cgl";
     if (args.length > 0) {
       sourcefile = args[0];
     }
     Scanner in = new Scanner(new File(sourcefile));
-    String outputfile = "code.qftasm";
+    String outputfile = "tetris.qftasm";
     if (args.length > 1) {
       outputfile = args[1];
     }
@@ -611,10 +611,10 @@ public class Compiler {
           test = testdest.dup();
           test.mode++;
           if (op.endsWith("=")) {
-            ROM.add(new Command("ADD", arg2, new Arg(1), testdest));
-            ROM.add(new Command("SUB", arg1, test, testdest));
+            cond.add(new Command("ADD", arg2, new Arg(1), testdest));
+            cond.add(new Command("SUB", arg1, test, testdest));
           } else {
-            ROM.add(new Command("SUB", arg1, arg2, testdest));
+            cond.add(new Command("SUB", arg1, arg2, testdest));
           }
         }
         cond.add(new Command("MLZ", test, new Arg("begin" + loop, 2),
