@@ -1,0 +1,87 @@
+# simpel GoL on 16x16 field
+
+# three basic shapes
+#my field[16]={2,24578,24578,0,0,0,0,0,0,0,112,64,32,0,7,0};
+
+# Kok's galaxy
+my field[16]={0 , 0 , 0 , 8112 , 8112 , 48 , 6192 , 6192 , 6192 , 6144 , 7152 , 7152 , 0 , 0 , 0 , 0 };
+
+my gen=0;
+my i;
+
+my field1[16];
+
+my j;
+my new;
+my old;
+
+my n[8];
+my nbit[4];
+my tmp;
+my i1;
+
+old=field;
+new=field1;
+
+do {
+  i=0;
+  do {
+
+    n[0]=0;
+    n[1]=0;
+    n[2]=0;
+    n[5]=0;
+    n[6]=0;
+    n[7]=0;
+  
+    if(i>0){
+      i1=i-1;
+      n[0]=old[i1]<<1;
+      n[1]=old[i1];
+      n[2]=old[i1]>>1;
+    }
+    n[3]=old[i]<<1;
+    n[4]=old[i]>>1;
+    if(i<15){
+      i1=i+1;
+      n[5]=old[i1]<<1;
+      n[6]=old[i1];
+      n[7]=old[i1]>>1;
+    }
+    
+    nbit[0]=n[0];
+    nbit[1]=0;
+    nbit[2]=0;
+    nbit[3]=0;
+    j=1;
+    do {
+      tmp=nbit[0];
+      nbit[0]^=n[j];
+      i1=tmp&n[j];
+      tmp=nbit[1];
+      nbit[1]^=i1;
+      i1=tmp&i1;
+      tmp=nbit[2];
+      nbit[2]^=i1;
+      i1=tmp&i1;
+      nbit[3]^=i1;
+      j+=1;
+    } while (j<8);
+    
+    tmp=nbit[0] | old[i];
+    tmp=tmp&nbit[1];
+    tmp=tmp&!nbit[2];
+    tmp=tmp&!nbit[3];    
+    new[i]=tmp;
+    
+    i=i+1;
+  } while(i<16);
+  
+  j=0;
+  do {
+    old[j]=new[j];
+    j=j+1;
+  } while(j<16);
+  
+  gen=gen+1;
+} while(gen<32);
