@@ -51,28 +51,28 @@ do {
             i1 = tmp & n[j];
             tmp = nbit[1];
             nbit[1] ^= i1;
-            i1 = tmp & i1;
+            i1 &= tmp;
             tmp = nbit[2];
             nbit[2] ^= i1;
-            i1 = tmp & i1;
+            i1 &= tmp;
             nbit[3] ^= i1;
             j += 1;
         } while (j < 8);
 
         tmp = nbit[0] | old[i];
-        tmp = tmp & nbit[1];
-        tmp = tmp & !nbit[2];
-        tmp = tmp & !nbit[3];
+        tmp &= nbit[1];
+        tmp &!= nbit[2];
+        tmp &!= nbit[3];
         new[i] = tmp;
 
-        i = i + 1;
+        i += 1;
     } while (i < 16);
 
     j = 0;
     do {
         old[j] = new[j];
-        j = j + 1;
+        j += 1;
     } while (j < 16);
 
-    gen = gen + 1;
+    gen += 1;
 } while (gen < 32);
