@@ -11,10 +11,9 @@ my field[18] =
 my gen = 0;
 my i;
 
-my field1[16];
+my new[16];
 
 my j;
-my new;
 my old;
 
 my n[8];
@@ -23,7 +22,6 @@ my tmp;
 my i1;
 
 old = field + 1;
-new = field1;
 
 do {
     i = 0;
