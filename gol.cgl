@@ -54,12 +54,11 @@ do {
             i1 &= tmp;
             tmp = nbit[2];
             nbit[2] ^= i1;
-            i1 &= tmp;
-            nbit[3] ^= i1;
+            nbit[3] = i1 & tmp; # since always <= 8
             j += 1;
         } while (j < 8);
 
-        tmp = nbit[0] | old[i];
+        tmp = nbit[0] | old[i]; 
         tmp &= nbit[1];
         tmp &!= nbit[2];
         tmp &!= nbit[3];
